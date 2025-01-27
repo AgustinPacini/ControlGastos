@@ -12,17 +12,17 @@ namespace ControlGastos.Application.Cobro_CQRS.Queries
     public class GetAllCobrosQueryHandler
     {
         private readonly ICobroRepository _cobroRepository;
-        private readonly Domain.Interfaces.IBaseRepository<Domain.Entity.Cobro> _baseRepository;
+        private readonly Domain.Interfaces.IBaseRepository<Cobro> _baseRepository;
 
-        public GetAllCobrosQueryHandler(ICobroRepository gastoRepository, Domain.Interfaces.IBaseRepository<Domain.Entity.Cobro> baseRepository)
+        public GetAllCobrosQueryHandler(ICobroRepository cobroRepository, Domain.Interfaces.IBaseRepository<Domain.Entity.Cobro> baseRepository)
         {
-            _cobroRepository = gastoRepository;
+            _cobroRepository = cobroRepository;
             _baseRepository = baseRepository;
         }
 
-        public async Task<List<Gasto>> Handle(GetAllGastosQuery request, CancellationToken cancellationToken)
+        public async Task<List<Cobro>> Handle(GetAllCobrosQuery request, CancellationToken cancellationToken)
         {
-            return (List<Gasto>)await _baseRepository.GetAllAsync();
+            return (List<Cobro>)await _baseRepository.GetAllAsync();
         }
     }
 }

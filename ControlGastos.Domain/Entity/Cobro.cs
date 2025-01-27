@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
 
 namespace ControlGastos.Domain.Entity
 {
@@ -10,7 +6,7 @@ namespace ControlGastos.Domain.Entity
     {
         public int Id { get; set; }
         public decimal Monto { get; set; }
-        public string Descripcion { get; set; }
+        public string? Descripcion { get; set; }
         public DateTime Fecha { get; set; }
         public TipoCobro Tipo { get; set; }
 

@@ -10,5 +10,5 @@ public class ControlGastosDbContext : DbContext
     }
 
     public DbSet<Gasto> Gastos { get; set; } = null!;
-    public DbSet<Cobro> Cobro { get; set; }=null!;
+    public DbSet<Cobro> Cobro { get; set; } = null!;
 }

@@ -20,7 +20,7 @@ namespace ControlGastos.Application.Cobro_CQRS.Commands
             _baseRepository = baseRepository;
         }
 
-        public async Task<int> Handle(CreateGastoCommand request, CancellationToken cancellationToken)
+        public async Task<int> Handle(CreateCobroCommand request, CancellationToken cancellationToken)
         {
             // Validaciones de negocio
             if (request.Monto <= 0)

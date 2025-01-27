@@ -1,4 +1,6 @@
-﻿using ControlGastos.Application.Gasto_CQRS.Commands;
+﻿using ControlGastos.Application.Cobro_CQRS.Commands;
+using ControlGastos.Application.Cobro_CQRS.Queries;
+using ControlGastos.Application.Gasto_CQRS.Commands;
 using ControlGastos.Application.Gasto_CQRS.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -18,7 +20,7 @@ namespace ControlGastos.Web.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] CreateGastoCommand command)
+        public async Task<IActionResult> Post([FromBody] CreateCobroCommand command)
         {
             var id = await _mediator.Send(command);
             return Ok(new { message = "Cobro creado", id });
@@ -27,8 +29,20 @@ namespace ControlGastos.Web.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            var gastos = await _mediator.Send(new GetAllGastosQuery());
+            var gastos = await _mediator.Send(new GetAllCobrosQuery());
             return Ok(gastos);
+        }
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var result = await _mediator.Send(new DeleteCobroCommand(id));
+
+            if (!result)
+            {
+                return NotFound(new { message = "No se encontró el Cobro para eliminar" });
+            }
+
+            return Ok(new { message = "Cobro eliminado con éxito" });
         }
 
     }

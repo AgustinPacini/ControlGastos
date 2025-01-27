@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using ControlGastos.Domain.Entity;
+using MediatR;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,6 +8,6 @@ using System.Threading.Tasks;
 
 namespace ControlGastos.Application.Cobro_CQRS.Queries
 {
-    public record GetAllCobrosQuery : IRequest<List<ControlGastos.Domain.Entity.Cobro>>;
+    public record GetAllCobrosQuery : IRequest<List<Cobro>>;
     
 }

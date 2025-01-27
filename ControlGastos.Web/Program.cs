@@ -22,6 +22,7 @@ builder.Services.AddScoped<ICobroRepository, CobroRepository>();
 builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
 
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ControlGastos.Application.AssemblyReference).Assembly));
+
 // REGISTRA los controladores:
 builder.Services.AddControllers();
 var app = builder.Build();
