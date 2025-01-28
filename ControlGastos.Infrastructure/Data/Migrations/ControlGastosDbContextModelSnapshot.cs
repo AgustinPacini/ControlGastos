@@ -22,31 +22,6 @@ namespace ControlGastos.Infrastructure.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("ControlGastos.Domain.Entity.Cobro", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Descripcion")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("Fecha")
-                        .HasColumnType("datetime2");
-
-                    b.Property<decimal>("Monto")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("Tipo")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Cobro");
-                });
-
             modelBuilder.Entity("ControlGastos.Domain.Entity.Gasto", b =>
                 {
                     b.Property<int>("Id")
@@ -76,6 +51,37 @@ namespace ControlGastos.Infrastructure.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Gastos");
+                });
+
+            modelBuilder.Entity("ControlGastos.Domain.Entity.Ingresos", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("Fecha")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Fuente")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MetodoRecepcion")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Monto")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Notas")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Ingresos");
                 });
 
             modelBuilder.Entity("ControlGastos.Domain.Entity.RefreshToken", b =>

@@ -7,23 +7,23 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ControlGastos.Application.Cobro_CQRS.Commands
+namespace ControlGastos.Application.Ingreso_CQRS.Commands
 {
    
-        public class DeleteCobroCommandHandler : IRequestHandler<DeleteCobroCommand, bool>
+        public class DeleteIngresoCommandHandler : IRequestHandler<DeleteIngresoCommand, bool>
         {
-            private readonly IBaseRepository<Cobro> _baseRepository;
+            private readonly IBaseRepository<Ingresos> _baseRepository;
 
-            public DeleteCobroCommandHandler(IBaseRepository<Cobro> baseRepository)
+            public DeleteIngresoCommandHandler(IBaseRepository<Ingresos> baseRepository)
             {
                 _baseRepository = baseRepository;
             }
 
-            public async Task<bool> Handle(DeleteCobroCommand request, CancellationToken cancellationToken)
+            public async Task<bool> Handle(DeleteIngresoCommand request, CancellationToken cancellationToken)
             {
                 // 1. Buscamos el Gasto por Id
-                var cobro = await _baseRepository.GetById(request.Id);
-                if (cobro == null)
+                var ingresos = await _baseRepository.GetById(request.Id);
+                if (ingresos == null)
                 {
                     // Si no existe, podrías lanzar una excepción 
                     // o retornar false, depende de tu preferencia
@@ -31,7 +31,7 @@ namespace ControlGastos.Application.Cobro_CQRS.Commands
                 }
 
                 // 2. Eliminamos el gasto
-                await _baseRepository.DeleteAsync(cobro);
+                await _baseRepository.DeleteAsync(ingresos);
 
                 return true;
             }
