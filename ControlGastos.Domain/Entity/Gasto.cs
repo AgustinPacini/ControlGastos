@@ -6,16 +6,10 @@ public class Gasto
     public decimal Monto { get; set; }
     public string Descripcion { get; set; }
     public DateTime Fecha { get; set; }
+    public string MetodoPago { get; set; }
+    public string Notas { get; set; }
 
 
 
-    public TipoGasto Tipo { get; set; }
 
-    public enum TipoGasto
-    {
-        Debito,
-        Efectivo,
-        Credito,
-        Tranferencia
-    }
 }

@@ -20,10 +20,12 @@ namespace ControlGastos.Web.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] CreateGastoCommand command)
+        public async Task<IActionResult> CreateGasto([FromBody] CreateGastoDto gastoDto)
         {
-            var id = await _mediator.Send(command);
-            return Ok(new { message = "Gasto creado", id });
+            // Enviamos un CreateGastoCommand con el DTO
+            var gastoId = await _mediator.Send(new CreateGastoCommand(gastoDto));
+
+            return Ok(new { message = "Gasto creado", id = gastoId });
         }
 
         [HttpGet]

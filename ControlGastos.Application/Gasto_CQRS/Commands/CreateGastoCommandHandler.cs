@@ -6,39 +6,49 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FluentValidation;
+using System.ComponentModel.DataAnnotations;
 
 namespace ControlGastos.Application.Gasto_CQRS.Commands
 {
     public class CreateGastoCommandHandler : IRequestHandler<CreateGastoCommand, int>
     {
-        private readonly IGastoRepository _gastoRepository;
+        
         private readonly Domain.Interfaces.IBaseRepository<Domain.Entity.Gasto> _baseRepository;
+        private readonly IValidator<CreateGastoDto> _validator;
 
-        public CreateGastoCommandHandler(IGastoRepository gastoRepository,Domain.Interfaces.IBaseRepository<Domain.Entity.Gasto> baseRepository)
+        public CreateGastoCommandHandler(Domain.Interfaces.IBaseRepository<Domain.Entity.Gasto> baseRepository, IValidator<CreateGastoDto> validator)
         {
-            _gastoRepository = gastoRepository;
+            
             _baseRepository = baseRepository;
+            _validator = validator;
         }
 
         public async Task<int> Handle(CreateGastoCommand request, CancellationToken cancellationToken)
         {
-            // Validaciones de negocio
-            if (request.Monto <= 0)
-                throw new Exception("El monto debe ser mayor a cero.");
+            // 1. Validar DTO con FluentValidation
+            var validationResult = await _validator.ValidateAsync(request.GastoDto, cancellationToken);
 
-            // Creamos la entidad Gasto
-            var gasto = new Domain.Entity.Gasto
+            if (!validationResult.IsValid)
             {
-                Descripcion = request.Descripcion,
-                Monto = request.Monto,
-                Fecha = request.Fecha,
-                Tipo = (Gasto.TipoGasto)request.TipoGasto
+                // Retornar error o lanzar excepción
+                var errors = validationResult.Errors.Select(e => e.ErrorMessage);
+                throw new Exception($"Errores de validación: {string.Join(", ", errors)}");
+            }
+            // 2. Mapear DTO -> Entidad de Dominio
+            var gasto = new Gasto
+            {
+                Descripcion = request.GastoDto.Concepto,
+                Monto = request.GastoDto.Monto,
+                Fecha = request.GastoDto.Fecha,
+                MetodoPago = request.GastoDto.MetodoPago,
+                Notas = request.GastoDto.Notas
             };
 
-            // Guardamos en el repositorio
+            // 3. Guardar en repositorio
             await _baseRepository.AddAsync(gasto);
 
-            // Retornamos el Id (asumiendo que la DB lo generó)
+            // 4. Retornar Id
             return gasto.Id;
         }
     }

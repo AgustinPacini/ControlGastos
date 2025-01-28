@@ -7,6 +7,6 @@ using System.Threading.Tasks;
 
 namespace ControlGastos.Application.Gasto_CQRS.Commands
 {
-    public record CreateGastoCommand(string Descripcion, decimal Monto, DateTime Fecha,int TipoGasto) : IRequest<int>;
+    public record CreateGastoCommand(CreateGastoDto GastoDto) : IRequest<int>;
     
 }

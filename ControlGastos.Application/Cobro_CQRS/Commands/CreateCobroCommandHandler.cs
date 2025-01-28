@@ -1,6 +1,7 @@
 ﻿using ControlGastos.Application.Gasto_CQRS.Commands;
 using ControlGastos.Domain.Entity;
 using ControlGastos.Domain.Interfaces;
+using MediatR;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,18 +10,18 @@ using System.Threading.Tasks;
 
 namespace ControlGastos.Application.Cobro_CQRS.Commands
 {
-    public class CreateCobroCommandHandler
+    public class CreateCobroCommandHandler: IRequestHandler<CreateCobroCommand, int>
     {
-        private readonly ICobroRepository _cobroRepository;
+        
         private readonly Domain.Interfaces.IBaseRepository<Domain.Entity.Cobro> _baseRepository;
 
-        public CreateCobroCommandHandler(ICobroRepository cobroRepository, Domain.Interfaces.IBaseRepository<Domain.Entity.Cobro> baseRepository)
+        public CreateCobroCommandHandler( Domain.Interfaces.IBaseRepository<Domain.Entity.Cobro> baseRepository)
         {
-            _cobroRepository = cobroRepository;
+            
             _baseRepository = baseRepository;
         }
 
-        public async Task<int> Handle(CreateGastoCommand request, CancellationToken cancellationToken)
+        public async Task<int> Handle(CreateCobroCommand request, CancellationToken cancellationToken)
         {
             // Validaciones de negocio
             if (request.Monto <= 0)
