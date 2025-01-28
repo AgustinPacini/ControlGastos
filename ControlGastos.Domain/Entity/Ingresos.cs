@@ -14,5 +14,8 @@ namespace ControlGastos.Domain.Entity
         public DateTime Fecha { get; set; }
         public string MetodoRecepcion { get; set; }
         public string Notas { get; set; }
+
+        public int CategoriaId { get; set; }
+        public Categoria Categoria { get; set; } = null!;
     }
 }

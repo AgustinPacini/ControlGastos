@@ -9,7 +9,8 @@ public class Gasto
     public string MetodoPago { get; set; }
     public string Notas { get; set; }
 
-
+    public int CategoriaId { get; set; }
+    public Categoria Categoria { get; set; } = null!;
 
 
 }
