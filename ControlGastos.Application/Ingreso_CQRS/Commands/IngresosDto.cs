@@ -4,11 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ControlGastos.Domain.Entity
+namespace ControlGastos.Application.Ingreso_CQRS.Commands
 {
-    public class Ingresos
+    public class IngresosDto
     {
-        public int Id { get; set; }
         public string Fuente { get; set; }
         public int Monto { get; set; }
         public DateTime Fecha { get; set; }

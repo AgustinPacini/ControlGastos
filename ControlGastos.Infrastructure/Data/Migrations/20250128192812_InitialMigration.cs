@@ -6,11 +6,45 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ControlGastos.Infrastructure.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class AddRefreshTokenEntity : Migration
+    public partial class InitialMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "Gastos",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Monto = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Descripcion = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Fecha = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    MetodoPago = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Notas = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Gastos", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Ingresos",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Fuente = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Monto = table.Column<int>(type: "int", nullable: false),
+                    Fecha = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    MetodoRecepcion = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Notas = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Ingresos", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Usuarios",
                 columns: table => new
@@ -57,6 +91,12 @@ namespace ControlGastos.Infrastructure.Data.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "Gastos");
+
+            migrationBuilder.DropTable(
+                name: "Ingresos");
+
             migrationBuilder.DropTable(
                 name: "RefreshTokens");
 

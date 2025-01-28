@@ -24,7 +24,7 @@ builder.Services.AddDbContext<ControlGastosDbContext>(options =>
 
 // 2. Registrar Repositorios
 builder.Services.AddScoped<IGastoRepository, GastoRepository>();
-builder.Services.AddScoped<ICobroRepository, CobroRepository>();
+builder.Services.AddScoped<IIngresoRepository, IngresoRepository>();
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));

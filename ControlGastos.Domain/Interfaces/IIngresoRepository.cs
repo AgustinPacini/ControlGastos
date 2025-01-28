@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace ControlGastos.Domain.Interfaces
 {
-    public interface ICobroRepository
+    public interface IIngresoRepository
     {
-        Task<IEnumerable<Cobro>> GetByMonth(int year, int month);
-        decimal ObtenerTotalCobrosPorMes(int year, int month);
+        Task<IEnumerable<Ingresos>> GetByMonth(int year, int month);
+        decimal ObtenerTotalIngresoPorMes(int year, int month);
     }
 }

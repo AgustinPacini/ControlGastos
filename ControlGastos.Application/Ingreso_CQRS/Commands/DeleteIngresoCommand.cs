@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ControlGastos.Application.Cobro_CQRS.Commands
+namespace ControlGastos.Application.Ingreso_CQRS.Commands
 {
-    public record DeleteCobroCommand(int Id) : IRequest<bool>;
+    public record DeleteIngresoCommand(int Id) : IRequest<bool>;
 }

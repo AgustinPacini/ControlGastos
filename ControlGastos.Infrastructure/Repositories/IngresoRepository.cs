@@ -10,20 +10,20 @@ using System.Threading.Tasks;
 
 namespace ControlGastos.Infrastructure.Repositories
 {
-    public class CobroRepository : ICobroRepository
+    public class IngresoRepository : IIngresoRepository
     {
         private readonly ControlGastosDbContext _context;
-        public CobroRepository(ControlGastosDbContext context)
+        public IngresoRepository(ControlGastosDbContext context)
         {
             _context = context;
         }
-        public async Task<IEnumerable<Cobro>> GetByMonth(int year, int month)
+        public async Task<IEnumerable<Ingresos>> GetByMonth(int year, int month)
         {
-            return await _context.Cobro.Where(c => c.Fecha.Year == year && c.Fecha.Month == month).ToListAsync();
+            return await _context.Ingresos.Where(c => c.Fecha.Year == year && c.Fecha.Month == month).ToListAsync();
         }
-        public decimal ObtenerTotalCobrosPorMes(int year, int month)
+        public decimal ObtenerTotalIngresoPorMes(int year, int month)
         {
-            return _context.Set<Cobro>()
+            return _context.Set<Ingresos>()
                 .Where(g => g.Fecha.Month == month && g.Fecha.Year == year)
                 .Sum(g => g.Monto);
         }
