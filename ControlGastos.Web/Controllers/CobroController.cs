@@ -29,8 +29,8 @@ namespace ControlGastos.Web.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            var gastos = await _mediator.Send(new GetAllCobrosQuery());
-            return Ok(gastos);
+            var cobros = await _mediator.Send(new GetAllCobrosQuery());
+            return Ok(cobros);
         }
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)

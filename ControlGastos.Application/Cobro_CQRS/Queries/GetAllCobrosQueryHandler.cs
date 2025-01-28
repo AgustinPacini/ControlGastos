@@ -1,6 +1,7 @@
 ﻿using ControlGastos.Application.Gasto_CQRS.Queries;
 using ControlGastos.Domain.Entity;
 using ControlGastos.Domain.Interfaces;
+using MediatR;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace ControlGastos.Application.Cobro_CQRS.Queries
 {
-    public class GetAllCobrosQueryHandler
+    public class GetAllCobrosQueryHandler : IRequestHandler<GetAllCobrosQuery, List<Cobro>>
     {
         private readonly ICobroRepository _cobroRepository;
         private readonly Domain.Interfaces.IBaseRepository<Cobro> _baseRepository;

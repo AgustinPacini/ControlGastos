@@ -5,6 +5,10 @@ using ControlGastos.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using MediatR;
 using System.Reflection;
+using ControlGastos.Application.Cobro_CQRS.Queries;
+using ControlGastos.Application;
+using FluentValidation;
+using ControlGastos.Web.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,12 +25,16 @@ builder.Services.AddScoped<IGastoRepository, GastoRepository>();
 builder.Services.AddScoped<ICobroRepository, CobroRepository>();
 builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
 
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ControlGastos.Application.AssemblyReference).Assembly));
+builder.Services.AddMediatR(cfg =>
+    cfg.RegisterServicesFromAssembly(typeof(AssemblyReference).Assembly));
+builder.Services.AddValidatorsFromAssembly(typeof(AssemblyReference).Assembly);
+
+
 
 // REGISTRA los controladores:
 builder.Services.AddControllers();
 var app = builder.Build();
-
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
