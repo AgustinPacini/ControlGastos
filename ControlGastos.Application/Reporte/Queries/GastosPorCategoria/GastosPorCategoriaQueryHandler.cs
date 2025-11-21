@@ -1,32 +1,32 @@
 ﻿using ControlGastos.Domain.Entity;
 using ControlGastos.Domain.Interfaces;
 using MediatR;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ControlGastos.Application.Reporte.Queries.GastosPorCategoria
 {
+    /// <summary>
+    /// Handler que devuelve el total gastado agrupado por categoría para un mes/año determinados.
+    /// </summary>
     public class GastosPorCategoriaQueryHandler : IRequestHandler<GastosPorCategoriaQuery, List<GastoPorCategoriaResult>>
     {
-        
+        private readonly IGastoRepository _gastoRepository;
 
-        private readonly IBaseRepository<Gasto> _gastoRepository;
-
-        public GastosPorCategoriaQueryHandler(IBaseRepository<Gasto> gastoRepository)
+        public GastosPorCategoriaQueryHandler(IGastoRepository gastoRepository)
         {
             _gastoRepository = gastoRepository;
         }
 
         public async Task<List<GastoPorCategoriaResult>> Handle(GastosPorCategoriaQuery request, CancellationToken cancellationToken)
         {
-            var gastos = await _gastoRepository.GetAllAsync();
+            // Traemos solo los gastos del mes/año solicitado.
+            var gastos = await _gastoRepository.GetByMonth(request.Anio, request.Mes);
 
             var resultado = gastos
-                .Where(g => g.Fecha.Month == request.Mes && g.Fecha.Year == request.Anio)
-                .GroupBy(g => g.Categoria.Nombre)
+                .GroupBy(g => g.Categoria?.Nombre ?? "Sin categoría")
                 .Select(g => new GastoPorCategoriaResult
                 {
                     Categoria = g.Key,

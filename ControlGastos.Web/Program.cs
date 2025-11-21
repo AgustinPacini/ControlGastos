@@ -1,75 +1,139 @@
-
+锘縰sing System;
+using System.Text;
+using ControlGastos.Application;
 using ControlGastos.Domain.Interfaces;
 using ControlGastos.Infrastructure.Data;
 using ControlGastos.Infrastructure.Repositories;
-using Microsoft.EntityFrameworkCore;
-using MediatR;
-using ControlGastos.Application;
-using FluentValidation;
-using ControlGastos.Web.Middlewares;
 using ControlGastos.Infrastructure.Services;
+using ControlGastos.Web.Middlewares;
+using FluentValidation;
+using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+// ==========================================
+// Configuraci贸n de servicios (Dependency Injection)
+// ==========================================
+
+// Controladores (Web API)
+builder.Services.AddControllers();
+
+// Swagger / OpenAPI
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-// 1. Configurar DbContext con SQL Server (cambia la cadena de conexi髇 a lo que necesites)
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "ControlGastos API",
+        Version = "v1"
+    });
+
+    // Definici贸n del esquema de seguridad Bearer
+    var securityScheme = new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Description = "Ingrese solo el token JWT (sin 'Bearer '), Swagger se encargar谩 del header.",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        Reference = new OpenApiReference
+        {
+            Type = ReferenceType.SecurityScheme,
+            Id = "Bearer"
+        }
+    };
+
+    options.AddSecurityDefinition("Bearer", securityScheme);
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        { securityScheme, Array.Empty<string>() }
+    });
+});
+
+// DbContext con SQL Server
 builder.Services.AddDbContext<ControlGastosDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// 2. Registrar Repositorios
+// Repositorios gen茅ricos y espec铆ficos
+builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
 builder.Services.AddScoped<IGastoRepository, GastoRepository>();
 builder.Services.AddScoped<IIngresoRepository, IngresoRepository>();
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
-builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
+builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
+builder.Services.AddScoped<IPresupuestoRepository, PresupuestoRepository>();
 
+// MediatR (CQRS)
 builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssembly(typeof(AssemblyReference).Assembly));
+
+// FluentValidation (validaci贸n de DTOs / comandos)
 builder.Services.AddValidatorsFromAssembly(typeof(AssemblyReference).Assembly);
+
+// Servicio para generaci贸n de JWT
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 
-// 3. Configurar la autenticaci髇 JWT
-var key = builder.Configuration["Jwt:Key"];
+// CORS para permitir el front en React (puertos t铆picos de Vite/React)
+const string AllowFrontendPolicy = "FrontendCorsPolicy";
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: AllowFrontendPolicy,
+        policy =>
+        {
+            policy
+                .WithOrigins("http://localhost:8081",
+                             "http://localhost:8080") // tu front
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+            // Si m谩s adelante us谩s cookies/autenticaci贸n con credenciales:
+            // .AllowCredentials();
+        });
+});
+
+// ===============================
+// Configuraci贸n de Autenticaci贸n JWT
+// ===============================
+var key = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key no est谩 configurado");
 var issuer = builder.Configuration["Jwt:Issuer"];
 var audience = builder.Configuration["Jwt:Audience"];
+
+var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
 
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 })
-    .AddJwtBearer(options =>
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
     {
-        options.RequireHttpsMetadata = false; // En producci髇: true
-        options.SaveToken = true;
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key!)),
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidIssuer = issuer,
-            ValidAudience = audience,
-            ClockSkew = TimeSpan.Zero
-        };
-    });
+        ValidateIssuer = !string.IsNullOrWhiteSpace(issuer),
+        ValidateAudience = !string.IsNullOrWhiteSpace(audience),
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = issuer,
+        ValidAudience = audience,
+        IssuerSigningKey = signingKey,
+        ClockSkew = TimeSpan.FromMinutes(2) // peque帽a tolerancia en expiraci贸n
+    };
+});
 
-// Agregamos Authorization al pipeline
+// Autorizaci贸n
 builder.Services.AddAuthorization();
 
-
-
-// REGISTRA los controladores:
-builder.Services.AddControllers();
 var app = builder.Build();
-app.UseMiddleware<ExceptionHandlingMiddleware>();
-// Configure the HTTP request pipeline.
+
+// ==========================================
+// Configuraci贸n del pipeline HTTP
+// ==========================================
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -78,8 +142,18 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// Middleware global para manejo prolijo de errores
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+// CORS para permitir llamadas desde el front
+app.UseCors(AllowFrontendPolicy);
+
+// Autenticaci贸n y autorizaci贸n
+app.UseAuthentication();
+app.UseAuthorization();
+
+// Endpoints de la API
 app.MapControllers();
 
+// Punto de entrada de la aplicaci贸n
 app.Run();
-
-

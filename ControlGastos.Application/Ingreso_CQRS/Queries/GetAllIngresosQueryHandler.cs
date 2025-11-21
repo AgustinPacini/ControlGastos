@@ -1,30 +1,44 @@
-﻿using ControlGastos.Application.Gasto_CQRS.Queries;
-using ControlGastos.Application.Ingreso_CQRS.Commands;
+﻿using ControlGastos.Application.Ingreso_CQRS.Commands;
 using ControlGastos.Domain.Entity;
 using ControlGastos.Domain.Interfaces;
 using MediatR;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ControlGastos.Application.Ingreso_CQRS.Queries
 {
+    /// <summary>
+    /// Handler para obtener el listado completo de ingresos.
+    /// </summary>
     public class GetAllIngresosQueryHandler : IRequestHandler<GetAllIngresosQuery, List<IngresosDto>>
     {
-       
-        private readonly Domain.Interfaces.IBaseRepository<Ingresos> _baseRepository;
+        private readonly IBaseRepository<Ingresos> _baseRepository;
 
-        public GetAllIngresosQueryHandler( Domain.Interfaces.IBaseRepository<Domain.Entity.Ingresos> baseRepository)
+        public GetAllIngresosQueryHandler(IBaseRepository<Ingresos> baseRepository)
         {
-            
             _baseRepository = baseRepository;
         }
 
+        /// <summary>
+        /// Obtiene todos los ingresos desde el repositorio y los mapea a DTOs.
+        /// </summary>
         public async Task<List<IngresosDto>> Handle(GetAllIngresosQuery request, CancellationToken cancellationToken)
         {
-            return (List<IngresosDto>)await _baseRepository.GetAllAsync();
+            var ingresos = await _baseRepository.GetAllAsync();
+
+            // Proyección explícita a DTO: evita exponer directamente la entidad de dominio.
+            return ingresos
+                .Select(i => new IngresosDto
+                {
+                    Fuente = i.Fuente,
+                    Monto = i.Monto,
+                    Fecha = i.Fecha,
+                    MetodoRecepcion = i.MetodoRecepcion,
+                    Notas = i.Notas
+                })
+                .ToList();
         }
     }
 }

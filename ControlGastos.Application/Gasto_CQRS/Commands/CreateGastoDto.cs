@@ -14,5 +14,6 @@ namespace ControlGastos.Application.Gasto_CQRS.Commands
         public string? MetodoPago {  get; set; }
         public string? Notas { get; set; }
 
+        public int CategoriaId { get; set; }
     }
 }

@@ -1,45 +1,47 @@
-﻿using ControlGastos.Application.Gasto_CQRS.Commands;
-using ControlGastos.Domain.Entity;
+﻿using ControlGastos.Domain.Entity;
 using ControlGastos.Domain.Interfaces;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ControlGastos.Application.Ingreso_CQRS.Commands
 {
-    public class CreateIngresoCommandHandler: IRequestHandler<CreateIngresoCommand, int>
+    /// <summary>
+    /// Handler encargado de crear un nuevo ingreso en el sistema.
+    /// </summary>
+    public class CreateIngresoCommandHandler : IRequestHandler<CreateIngresoCommand, int>
     {
-        
-        private readonly Domain.Interfaces.IBaseRepository<Domain.Entity.Ingresos> _baseRepository;
+        private readonly IBaseRepository<Ingresos> _baseRepository;
 
-        public CreateIngresoCommandHandler( Domain.Interfaces.IBaseRepository<Domain.Entity.Ingresos> baseRepository)
+        public CreateIngresoCommandHandler(IBaseRepository<Ingresos> baseRepository)
         {
-            
             _baseRepository = baseRepository;
         }
 
+        /// <summary>
+        /// Ejecuta la creación del ingreso a partir del DTO recibido en el comando.
+        /// </summary>
+        /// <param name="request">Comando que contiene los datos del ingreso a crear.</param>
+        /// <param name="cancellationToken">Token de cancelación.</param>
+        /// <returns>Id del ingreso creado.</returns>
         public async Task<int> Handle(CreateIngresoCommand request, CancellationToken cancellationToken)
         {
-            // Validaciones de negocio
-            if (request.Ingresos.Monto <= 0)
-                throw new Exception("El monto debe ser mayor a cero.");
+            // Se podría agregar validación adicional aquí (FluentValidation, reglas de negocio, etc.)
 
-            // Creamos la entidad Gasto
-            var ingresos = new Domain.Entity.Ingresos
+            var ingresos = new Ingresos
             {
                 Fuente = request.Ingresos.Fuente,
                 Monto = request.Ingresos.Monto,
                 Fecha = request.Ingresos.Fecha,
-                MetodoRecepcion = request.Ingresos.MetodoRecepcion
+                MetodoRecepcion = request.Ingresos.MetodoRecepcion,
+                Notas = request.Ingresos.Notas,
+                CategoriaId = request.Ingresos.CategoriaId
             };
 
             // Guardamos en el repositorio
             await _baseRepository.AddAsync(ingresos);
 
-            // Retornamos el Id (asumiendo que la DB lo generó)
+            // Retornamos el Id (asumiendo que la DB lo generó al guardar)
             return ingresos.Id;
         }
     }

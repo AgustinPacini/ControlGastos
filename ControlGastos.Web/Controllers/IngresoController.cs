@@ -1,15 +1,18 @@
-﻿
-using ControlGastos.Application.Ingreso_CQRS.Commands;
+﻿using ControlGastos.Application.Ingreso_CQRS.Commands;
 using ControlGastos.Application.Ingreso_CQRS.Queries;
 using MediatR;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ControlGastos.Web.Controllers
 {
+    /// <summary>
+    /// Endpoints para gestionar los ingresos del usuario.
+    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
-    public class IngresoController : Controller
+    [Authorize]
+    public class IngresoController : ControllerBase
     {
         private readonly IMediator _mediator;
 
@@ -18,20 +21,41 @@ namespace ControlGastos.Web.Controllers
             _mediator = mediator;
         }
 
+        /// <summary>
+        /// Crea un nuevo ingreso.
+        /// </summary>
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] CreateIngresoCommand command)
+        public async Task<IActionResult> Create([FromBody] IngresosDto dto)
         {
-            var id = await _mediator.Send(command);
-            return Ok(new { message = "Ingreso creado", id });
+            var id = await _mediator.Send(new CreateIngresoCommand(dto));
+            return CreatedAtAction(nameof(GetById), new { id }, new { id });
         }
 
+        /// <summary>
+        /// Obtiene el listado completo de ingresos.
+        /// </summary>
         [HttpGet]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> GetAll()
         {
-            var cobros = await _mediator.Send(new GetAllIngresosQuery());
-            return Ok(cobros);
+            var ingresos = await _mediator.Send(new GetAllIngresosQuery());
+            return Ok(ingresos);
         }
-        [HttpDelete("{id}")]
+
+        /// <summary>
+        /// Obtiene un ingreso por su Id.
+        /// </summary>
+        [HttpGet("{id:int}")]
+        public IActionResult GetById(int id)
+        {
+            // Por ahora no existe un Query específico por Id.
+            // Se deja como placeholder para futura implementación.
+            return NoContent();
+        }
+
+        /// <summary>
+        /// Elimina un ingreso por su Id.
+        /// </summary>
+        [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
             var result = await _mediator.Send(new DeleteIngresoCommand(id));
@@ -43,6 +67,5 @@ namespace ControlGastos.Web.Controllers
 
             return Ok(new { message = "Ingreso eliminado con éxito" });
         }
-
     }
 }

@@ -1,26 +1,26 @@
 ﻿using ControlGastos.Domain.Interfaces;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using DomainPresupuesto = ControlGastos.Domain.Entity.Presupuesto;
 
 namespace ControlGastos.Application.Presupuesto.Commands
 {
+    /// <summary>
+    /// Handler encargado de crear un nuevo presupuesto.
+    /// </summary>
     public class CreatePresupuestoCommandHandler : IRequestHandler<CreatePresupuestoCommand, int>
     {
-        private readonly Domain.Interfaces.IBaseRepository<Domain.Entity.Presupuesto> _presupuestoRepository;
-        
+        private readonly IBaseRepository<DomainPresupuesto> _presupuestoRepository;
 
-        public CreatePresupuestoCommandHandler(Domain.Interfaces.IBaseRepository<Domain.Entity.Presupuesto> presupuestoRepository)
+        public CreatePresupuestoCommandHandler(IBaseRepository<DomainPresupuesto> presupuestoRepository)
         {
             _presupuestoRepository = presupuestoRepository;
         }
 
         public async Task<int> Handle(CreatePresupuestoCommand request, CancellationToken cancellationToken)
         {
-            var presupuesto = new Domain.Entity.Presupuesto()
+            var presupuesto = new DomainPresupuesto
             {
                 Nombre = request.Nombre,
                 MontoLimite = request.MontoLimite,

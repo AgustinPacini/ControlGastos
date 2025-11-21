@@ -1,44 +1,40 @@
-﻿using ControlGastos.Domain.Entity;
-using ControlGastos.Domain.Interfaces;
+﻿using ControlGastos.Domain.Interfaces;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ControlGastos.Application.Reporte.Queries.BalanceMensual
 {
+    /// <summary>
+    /// Handler que calcula el balance mensual (ingresos - gastos) para un mes/año determinados.
+    /// Utiliza repositorios especializados que ejecutan los cálculos directamente en la base de datos.
+    /// </summary>
     public class BalanceMensualQueryHandler : IRequestHandler<BalanceMensualQuery, BalanceMensualResult>
     {
-        private readonly IBaseRepository<Gasto> _gastosRepository;
-        private readonly IBaseRepository<Ingresos> _ingresoRepository;
+        private readonly IGastoRepository _gastoRepository;
+        private readonly IIngresoRepository _ingresoRepository;
 
-        public BalanceMensualQueryHandler(IBaseRepository<Gasto> gastosRepository, IBaseRepository<Ingresos> ingresoRepository)
+        public BalanceMensualQueryHandler(IGastoRepository gastoRepository, IIngresoRepository ingresoRepository)
         {
-            _gastosRepository = gastosRepository;
+            _gastoRepository = gastoRepository;
             _ingresoRepository = ingresoRepository;
         }
 
-        public async Task<BalanceMensualResult> Handle(BalanceMensualQuery request, CancellationToken cancellationToken)
+        public Task<BalanceMensualResult> Handle(BalanceMensualQuery request, CancellationToken cancellationToken)
         {
-            var gastos = await _gastosRepository.GetAllAsync();
-            var ingresos = await _ingresoRepository.GetAllAsync();
+            // Calculamos los totales usando los métodos especializados del repositorio.
+            // Esto evita traer todos los datos a memoria y hace el código más escalable.
+            var totalGastos = _gastoRepository.ObtenerTotalGastosPorMes(request.Anio, request.Mes);
+            var totalIngresos = _ingresoRepository.ObtenerTotalIngresoPorMes(request.Anio, request.Mes);
 
-            var totalGastos = gastos
-                .Where(g => g.Fecha.Month == request.Mes && g.Fecha.Year == request.Anio)
-                .Sum(g => g.Monto);
-
-            var totalIngresos = ingresos
-                .Where(i => i.Fecha.Month == request.Mes && i.Fecha.Year == request.Anio)
-                .Sum(i => i.Monto);
-
-            return new BalanceMensualResult
+            var result = new BalanceMensualResult
             {
                 TotalIngresos = totalIngresos,
                 TotalGastos = totalGastos,
                 Balance = totalIngresos - totalGastos
             };
+
+            return Task.FromResult(result);
         }
     }
 }
