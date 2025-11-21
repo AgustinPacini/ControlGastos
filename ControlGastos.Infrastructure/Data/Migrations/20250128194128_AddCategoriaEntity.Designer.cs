@@ -4,6 +4,7 @@ using ControlGastos.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ControlGastos.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(ControlGastosDbContext))]
-    partial class ControlGastosDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250128194128_AddCategoriaEntity")]
+    partial class AddCategoriaEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -114,37 +117,6 @@ namespace ControlGastos.Infrastructure.Data.Migrations
                     b.ToTable("Ingresos");
                 });
 
-            modelBuilder.Entity("ControlGastos.Domain.Entity.Presupuesto", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("Anio")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("CategoriaId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Mes")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("MontoLimite")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("Nombre")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CategoriaId");
-
-                    b.ToTable("Presupuestos");
-                });
-
             modelBuilder.Entity("ControlGastos.Domain.Entity.RefreshToken", b =>
                 {
                     b.Property<int>("Id")
@@ -216,16 +188,6 @@ namespace ControlGastos.Infrastructure.Data.Migrations
                         .HasForeignKey("CategoriaId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.Navigation("Categoria");
-                });
-
-            modelBuilder.Entity("ControlGastos.Domain.Entity.Presupuesto", b =>
-                {
-                    b.HasOne("ControlGastos.Domain.Entity.Categoria", "Categoria")
-                        .WithMany()
-                        .HasForeignKey("CategoriaId")
-                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Categoria");
                 });

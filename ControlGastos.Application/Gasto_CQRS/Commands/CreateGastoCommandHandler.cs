@@ -1,25 +1,23 @@
-﻿using ControlGastos.Domain.Interfaces;
-using ControlGastos.Domain.Entity;
-using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ControlGastos.Domain.Entity;
+using ControlGastos.Domain.Interfaces;
 using FluentValidation;
-using System.ComponentModel.DataAnnotations;
+using MediatR;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace ControlGastos.Application.Gasto_CQRS.Commands
 {
+    /// <summary>
+    /// Handler encargado de crear un nuevo gasto.
+    /// </summary>
     public class CreateGastoCommandHandler : IRequestHandler<CreateGastoCommand, int>
     {
-        
-        private readonly Domain.Interfaces.IBaseRepository<Domain.Entity.Gasto> _baseRepository;
+        private readonly IBaseRepository<Gasto> _baseRepository;
         private readonly IValidator<CreateGastoDto> _validator;
 
-        public CreateGastoCommandHandler(Domain.Interfaces.IBaseRepository<Domain.Entity.Gasto> baseRepository, IValidator<CreateGastoDto> validator)
+        public CreateGastoCommandHandler(IBaseRepository<Gasto> baseRepository,
+                                         IValidator<CreateGastoDto> validator)
         {
-            
             _baseRepository = baseRepository;
             _validator = validator;
         }
@@ -28,21 +26,20 @@ namespace ControlGastos.Application.Gasto_CQRS.Commands
         {
             // 1. Validar DTO con FluentValidation
             var validationResult = await _validator.ValidateAsync(request.GastoDto, cancellationToken);
-
             if (!validationResult.IsValid)
             {
-                // Retornar error o lanzar excepción
-                var errors = validationResult.Errors.Select(e => e.ErrorMessage);
-                throw new Exception($"Errores de validación: {string.Join(", ", errors)}");
+                throw new ValidationException(validationResult.Errors);
             }
-            // 2. Mapear DTO -> Entidad de Dominio
+
+            // 2. Mapear DTO -> Entidad de dominio
             var gasto = new Gasto
             {
-                Descripcion = request.GastoDto.Concepto,
+                Descripcion = request.GastoDto.Concepto ?? string.Empty,
                 Monto = request.GastoDto.Monto,
                 Fecha = request.GastoDto.Fecha,
-                MetodoPago = request.GastoDto.MetodoPago,
-                Notas = request.GastoDto.Notas
+                MetodoPago = request.GastoDto.MetodoPago ?? string.Empty,
+                Notas = request.GastoDto.Notas,
+                CategoriaId = request.GastoDto.CategoriaId
             };
 
             // 3. Guardar en repositorio

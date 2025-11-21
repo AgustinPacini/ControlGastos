@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using System.Net;
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 
 namespace ControlGastos.Web.Middlewares
 {
@@ -35,15 +36,32 @@ namespace ControlGastos.Web.Middlewares
             var statusCode = (int)HttpStatusCode.InternalServerError;
             var errors = new List<string> { exception.Message };
 
-            // Revisamos el tipo de excepción para decidir el status code o el formato de la respuesta
+            // 1) Errores de validación (FluentValidation)
             if (exception is ValidationException validationEx)
             {
-                // 400 - Bad Request
                 statusCode = (int)HttpStatusCode.BadRequest;
-                // Extraemos mensajes de error de FluentValidation
                 errors = validationEx.Errors
                     .Select(e => e.ErrorMessage)
                     .ToList();
+            }
+            // 2) Errores de base de datos (DbUpdateException)
+            else if (exception is DbUpdateException dbEx)
+            {
+                statusCode = (int)HttpStatusCode.InternalServerError;
+
+                // Mensaje genérico
+                errors = new List<string> { dbEx.Message };
+
+                // Mensaje de la inner exception (el interesante)
+                if (dbEx.InnerException != null)
+                {
+                    errors.Add(dbEx.InnerException.Message);
+
+                    if (dbEx.InnerException.InnerException != null)
+                    {
+                        errors.Add(dbEx.InnerException.InnerException.Message);
+                    }
+                }
             }
             // Podrías verificar otros tipos de excepción (NotFound, Unauthorized, etc.)
             // else if (exception is NotFoundException notFoundEx) { ... }

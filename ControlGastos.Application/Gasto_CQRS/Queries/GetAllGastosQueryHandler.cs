@@ -1,28 +1,32 @@
 ﻿using ControlGastos.Domain.Entity;
 using ControlGastos.Domain.Interfaces;
 using MediatR;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ControlGastos.Application.Gasto_CQRS.Queries
 {
+    /// <summary>
+    /// Handler para obtener el listado completo de gastos.
+    /// </summary>
     public class GetAllGastosQueryHandler : IRequestHandler<GetAllGastosQuery, List<Gasto>>
     {
-        private readonly IGastoRepository _gastoRepository;
-        private readonly Domain.Interfaces.IBaseRepository<Domain.Entity.Gasto> _baseRepository;
+        private readonly IBaseRepository<Gasto> _baseRepository;
 
-        public GetAllGastosQueryHandler(IGastoRepository gastoRepository,Domain.Interfaces.IBaseRepository<Domain.Entity.Gasto> baseRepository)
+        public GetAllGastosQueryHandler(IBaseRepository<Gasto> baseRepository)
         {
-            _gastoRepository = gastoRepository;
             _baseRepository = baseRepository;
         }
 
+        /// <summary>
+        /// Obtiene todos los gastos desde el repositorio.
+        /// </summary>
         public async Task<List<Gasto>> Handle(GetAllGastosQuery request, CancellationToken cancellationToken)
         {
-            return (List<Gasto>)await _baseRepository.GetAllAsync();
+            var gastos = await _baseRepository.GetAllAsync();
+            return gastos.ToList();
         }
     }
 }
