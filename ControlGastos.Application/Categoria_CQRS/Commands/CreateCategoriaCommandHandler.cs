@@ -27,6 +27,7 @@ namespace ControlGastos.Application.Categoria_CQRS.Commands
             {
                 Nombre = request.Nombre,
                 Descripcion = request.Descripcion
+
             };
 
             await _categoriaRepository.AddAsync(categoria);

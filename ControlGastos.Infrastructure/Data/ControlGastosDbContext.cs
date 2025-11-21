@@ -39,5 +39,16 @@ public class ControlGastosDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(p => p.CategoriaId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Categoria>(entity =>
+        {
+            entity.Property(c => c.Nombre)
+                  .IsRequired();
+
+            entity.Property(c => c.TipoCategoria)
+                  .IsRequired()
+                  .HasMaxLength(20)
+                  .HasDefaultValue("Ambos");
+        });
     }
 }

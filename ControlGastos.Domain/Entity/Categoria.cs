@@ -20,6 +20,7 @@ namespace ControlGastos.Domain.Entity
         
         public string? Descripcion { get; set; }
 
+        public string TipoCategoria { get; set; } = "Ambos";
         // Relación con Gastos e Ingresos (opcional si decides categorizar ambos)
         public ICollection<Gasto>? Gastos { get; set; }
         public ICollection<Ingresos>? Ingresos { get; set; }

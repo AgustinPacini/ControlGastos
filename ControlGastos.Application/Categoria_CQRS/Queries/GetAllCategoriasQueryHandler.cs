@@ -30,7 +30,8 @@ namespace ControlGastos.Application.Categoria_CQRS.Queries
                 {
                     Id = c.Id,
                     Nombre = c.Nombre,
-                    Descripcion = c.Descripcion
+                    Descripcion = c.Descripcion,
+                    TipoCategoria = c.TipoCategoria
                 })
                 .ToList();
         }
