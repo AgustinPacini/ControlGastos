@@ -13,10 +13,10 @@ namespace ControlGastos.Application.Gasto_CQRS.Commands
     public class CreateGastoCommandHandler : IRequestHandler<CreateGastoCommand, int>
     {
         private readonly IBaseRepository<Gasto> _baseRepository;
-        private readonly IValidator<CreateGastoDto> _validator;
+        private readonly IValidator<GastoDto> _validator;
 
         public CreateGastoCommandHandler(IBaseRepository<Gasto> baseRepository,
-                                         IValidator<CreateGastoDto> validator)
+                                         IValidator<GastoDto> validator)
         {
             _baseRepository = baseRepository;
             _validator = validator;

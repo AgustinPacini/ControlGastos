@@ -10,6 +10,7 @@ namespace ControlGastos.Domain.Interfaces
     public interface IPresupuestoRepository
     {
         Task<Presupuesto?> GetByIdAsync(int id);
-        
+        Task<List<Presupuesto>> GetByMesAnioAsync(int anio, int mes);
+
     }
 }

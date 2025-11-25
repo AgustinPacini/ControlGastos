@@ -25,7 +25,13 @@ namespace ControlGastos.Infrastructure.Repositories
                                  .Include(p => p.Categoria)
                                  .FirstOrDefaultAsync(p => p.Id == id);
         }
+        public async Task<List<Presupuesto>> GetByMesAnioAsync(int anio, int mes)
+        {
+            return await _context.Presupuestos
+                .Include(p => p.Categoria)
+                .Where(p => p.Anio == anio && p.Mes == mes)
+                .ToListAsync();
+        }
 
-        
     }
 }
