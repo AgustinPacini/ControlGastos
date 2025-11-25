@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ControlGastos.Application.Gasto_CQRS.Commands
 {
-    public class CreateGastoDtoValidator : AbstractValidator<CreateGastoDto>
+    public class CreateGastoDtoValidator : AbstractValidator<GastoDto>
     {
         public CreateGastoDtoValidator()
         {

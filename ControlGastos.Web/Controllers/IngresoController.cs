@@ -44,13 +44,15 @@ namespace ControlGastos.Web.Controllers
         /// <summary>
         /// Obtiene un ingreso por su Id.
         /// </summary>
+        
         [HttpGet("{id:int}")]
-        public IActionResult GetById(int id)
+        public async Task<IActionResult> GetById(int id)
         {
-            // Por ahora no existe un Query específico por Id.
-            // Se deja como placeholder para futura implementación.
-            return NoContent();
-        }
+            var ingreso = await _mediator.Send(new GetIngresoByIdQuery(id));
+            if (ingreso is null) return NotFound(new { message = "Ingreso no encontrado" });
+            return Ok(ingreso);
+        } 
+        
 
         /// <summary>
         /// Elimina un ingreso por su Id.
@@ -66,6 +68,17 @@ namespace ControlGastos.Web.Controllers
             }
 
             return Ok(new { message = "Ingreso eliminado con éxito" });
+        }
+       
+       
+
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> Update(int id, [FromBody] IngresosDto dto)
+        {
+            var result = await _mediator.Send(new UpdateIngresoCommand(id, dto));
+            if (!result) return NotFound(new { message = "Ingreso no encontrado" });
+
+            return Ok(new { message = "Ingreso actualizado con éxito" });
         }
     }
 }

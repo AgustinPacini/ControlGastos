@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ControlGastos.Application.Gasto_CQRS.Commands
 {
-    public class CreateGastoDto
+    public class GastoDto
     {
         public string? Concepto { get; set; }
         public decimal Monto { get; set; }

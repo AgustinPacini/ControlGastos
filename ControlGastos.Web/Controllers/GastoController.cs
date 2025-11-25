@@ -25,7 +25,7 @@ namespace ControlGastos.Web.Controllers
         /// Crea un nuevo gasto.
         /// </summary>
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateGastoDto gastoDto)
+        public async Task<IActionResult> Create([FromBody] GastoDto gastoDto)
         {
             if (gastoDto is null)
                 return BadRequest(new { message = "Los datos del gasto son requeridos." });
@@ -43,6 +43,37 @@ namespace ControlGastos.Web.Controllers
         {
             var gastos = await _mediator.Send(new GetAllGastosQuery());
             return Ok(gastos);
+        }
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var gasto = await _mediator.Send(new GetGastoByIdQuery(id));
+            if (gasto is null) return NotFound(new { message = "Gasto no encontrado" });
+            return Ok(gasto);
+        }
+
+        /// <summary>
+        /// Actualiza un gasto existente.
+        /// </summary>
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> Update(int id, [FromBody] GastoDto dto)
+        {
+            var result = await _mediator.Send(new UpdateGastoCommand(id, dto));
+            if (!result) return NotFound(new { message = "Gasto no encontrado" });
+
+            return Ok(new { message = "Gasto actualizado correctamente" });
+        }
+
+        /// <summary>
+        /// Elimina un gasto existente.
+        /// </summary>
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var result = await _mediator.Send(new DeleteGastoCommand(id));
+            if (!result) return NotFound(new { message = "Gasto no encontrado" });
+
+            return Ok(new { message = "Gasto eliminado correctamente" });
         }
     }
 }

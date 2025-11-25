@@ -16,6 +16,8 @@ public class ControlGastosDbContext : DbContext
     public DbSet<Categoria> Categorias { get; set; } = null!;
     public DbSet<Presupuesto> Presupuestos { get; set; } = null!;
 
+    public DbSet<MetaAhorro>MetaAhorros { get; set; } = null!;
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -5,6 +5,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using ControlGastos.Application.Categoria_CQRS.Queries;
 
 namespace ControlGastos.Web.Controllers
 {
@@ -41,6 +42,34 @@ namespace ControlGastos.Web.Controllers
             );
 
             return CreatedAtAction(nameof(GetAll), new { id }, new { id });
+        }
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var categoria = await _mediator.Send(new GetCategoriaByIdQuery(id));
+            if (categoria is null) return NotFound(new { message = "Categoría no encontrada" });
+            return Ok(categoria);
+        }
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> Update(int id, [FromBody] CategoriaDto request)
+        {
+            var result = await _mediator.Send(
+                new UpdateCategoriaCommand(id, request.Nombre, request.Descripcion, request.TipoCategoria)
+            );
+
+            if (!result) return NotFound(new { message = "Categoría no encontrada" });
+
+            return Ok(new { message = "Categoría actualizada correctamente" });
+        }
+
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var result = await _mediator.Send(new DeleteCategoriaCommand(id));
+
+            if (!result) return NotFound(new { message = "Categoría no encontrada" });
+
+            return Ok(new { message = "Categoría eliminada correctamente" });
         }
     }
 }
