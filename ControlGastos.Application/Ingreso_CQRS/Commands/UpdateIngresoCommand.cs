@@ -7,5 +7,5 @@ using System.Threading.Tasks;
 
 namespace ControlGastos.Application.Ingreso_CQRS.Commands
 {
-    public record UpdateIngresoCommand(int Id, IngresosDto IngresoDto) : IRequest<bool>;
+    public record UpdateIngresoCommand(int Id, int UsuarioId, IngresosDto Ingresos) : IRequest<bool>;
 }

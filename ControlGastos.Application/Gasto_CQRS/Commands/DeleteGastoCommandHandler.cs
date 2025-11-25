@@ -23,6 +23,8 @@ namespace ControlGastos.Application.Gasto_CQRS.Commands
             var gasto = await _baseRepository.GetById(request.Id);
             if (gasto == null) return false;
 
+            if (gasto.UsuarioId != request.UsuarioId) return false;
+
             await _baseRepository.DeleteAsync(gasto);
             return true;
         }

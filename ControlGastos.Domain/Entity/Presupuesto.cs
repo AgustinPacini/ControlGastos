@@ -35,5 +35,9 @@ namespace ControlGastos.Domain.Entity
         /// </summary>
         public int? CategoriaId { get; set; }
         public Categoria? Categoria { get; set; }
+
+        // 🔹 Multiusuario
+        public int UsuarioId { get; set; }
+        public Usuario Usuario { get; set; } = null!;
     }
 }

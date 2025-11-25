@@ -20,7 +20,11 @@ namespace ControlGastos.Application.Gasto_CQRS.Queries
 
         public async Task<Gasto?> Handle(GetGastoByIdQuery request, CancellationToken cancellationToken)
         {
-            return await _baseRepository.GetById(request.Id);
+            var gasto = await _baseRepository.GetById(request.Id);
+            if (gasto == null || gasto.UsuarioId != request.UsuarioId)
+                return null;
+
+            return gasto;
         }
     }
 }

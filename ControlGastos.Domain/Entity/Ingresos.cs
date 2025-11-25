@@ -46,5 +46,13 @@ namespace ControlGastos.Domain.Entity
         /// Categoría asociada al ingreso.
         /// </summary>
         public Categoria Categoria { get; set; } = null!;
+
+        // 🔹 Multiusuario
+        public int UsuarioId { get; set; }
+        public Usuario Usuario { get; set; } = null!;
+
+        // 🔹 Relación con Cuenta
+        public int? CuentaId { get; set; }
+        public Cuenta? Cuenta { get; set; }
     }
 }

@@ -11,7 +11,7 @@ namespace ControlGastos.Application.Gasto_CQRS.Commands
         public string? Concepto { get; set; }
         public decimal Monto { get; set; }
         public DateTime Fecha { get; set; }
-        public string? MetodoPago {  get; set; }
+        public string? MetodoPago { get; set; }
         public string? Notas { get; set; }
 
         public int CategoriaId { get; set; }

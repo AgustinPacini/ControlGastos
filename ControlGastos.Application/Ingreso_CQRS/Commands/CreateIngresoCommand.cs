@@ -7,6 +7,6 @@ using System.Threading.Tasks;
 
 namespace ControlGastos.Application.Ingreso_CQRS.Commands
 {
-    public record CreateIngresoCommand(IngresosDto Ingresos) : IRequest<int>;
-    
+    public record CreateIngresoCommand(int UsuarioId, IngresosDto Ingresos) : IRequest<int>;
+
 }

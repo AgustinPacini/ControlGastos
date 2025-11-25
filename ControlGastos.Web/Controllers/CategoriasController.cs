@@ -15,7 +15,7 @@ namespace ControlGastos.Web.Controllers
     public class CategoriasController : ControllerBase
     {
         private readonly IMediator _mediator;
-
+     
         public CategoriasController(IMediator mediator)
         {
             _mediator = mediator;

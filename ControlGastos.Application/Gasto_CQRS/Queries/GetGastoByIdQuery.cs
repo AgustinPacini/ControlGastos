@@ -8,5 +8,5 @@ using System.Threading.Tasks;
 
 namespace ControlGastos.Application.Gasto_CQRS.Queries
 {
-    public record GetGastoByIdQuery(int Id) : IRequest<Gasto?>;
+    public record GetGastoByIdQuery(int Id, int UsuarioId) : IRequest<Gasto?>;
 }

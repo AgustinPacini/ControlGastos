@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ControlGastos.Application.Gasto_CQRS.Queries
 {
-    
-    public record GetAllGastosQuery() : IRequest<List<Gasto>>;
+
+    public record GetAllGastosQuery(int UsuarioId) : IRequest<List<Gasto>>;
 }
 

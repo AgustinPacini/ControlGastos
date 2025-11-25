@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ControlGastos.Application.Gasto_CQRS.Commands
 {
-    public record CreateGastoCommand(GastoDto GastoDto) : IRequest<int>;
-    public record UpdateGastoCommand(int Id, GastoDto GastoDto) : IRequest<bool>;
+    public record CreateGastoCommand(int UsuarioId, GastoDto GastoDto) : IRequest<int>;
+    public record UpdateGastoCommand(int Id, int UsuarioId, GastoDto GastoDto) : IRequest<bool>;
 
 }

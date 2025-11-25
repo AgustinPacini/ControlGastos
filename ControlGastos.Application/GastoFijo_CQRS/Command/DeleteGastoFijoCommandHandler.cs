@@ -1,0 +1,32 @@
+﻿using ControlGastos.Domain.Entity;
+using ControlGastos.Domain.Interfaces;
+using MediatR;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ControlGastos.Application.GastoFijo_CQRS.Command
+{
+    public class DeleteGastoFijoCommandHandler
+        : IRequestHandler<DeleteGastoFijoCommand, bool>
+    {
+        private readonly IBaseRepository<GastoFijo> _repo;
+
+        public DeleteGastoFijoCommandHandler(IBaseRepository<GastoFijo> repo)
+        {
+            _repo = repo;
+        }
+
+        public async Task<bool> Handle(DeleteGastoFijoCommand request, CancellationToken cancellationToken)
+        {
+            var entity = await _repo.GetById(request.Id);
+            if (entity == null || entity.UsuarioId != request.UsuarioId)
+                return false;
+
+            await _repo.DeleteAsync(entity);
+            return true;
+        }
+    }
+}

@@ -49,6 +49,38 @@ namespace ControlGastos.Infrastructure.Data.Migrations
                     b.ToTable("Categorias");
                 });
 
+            modelBuilder.Entity("ControlGastos.Domain.Entity.Cuenta", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("SaldoActual")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("SaldoInicial")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UsuarioId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.ToTable("Cuentas");
+                });
+
             modelBuilder.Entity("ControlGastos.Domain.Entity.Gasto", b =>
                 {
                     b.Property<int>("Id")
@@ -58,6 +90,9 @@ namespace ControlGastos.Infrastructure.Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("CategoriaId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("CuentaId")
                         .HasColumnType("int");
 
                     b.Property<string>("Descripcion")
@@ -78,11 +113,66 @@ namespace ControlGastos.Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("UsuarioId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CategoriaId");
 
+                    b.HasIndex("CuentaId");
+
+                    b.HasIndex("UsuarioId");
+
                     b.ToTable("Gastos");
+                });
+
+            modelBuilder.Entity("ControlGastos.Domain.Entity.GastoFijo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Activo")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("CategoriaId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("CuentaId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Descripcion")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("DiaReferencia")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("FechaInicio")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("Monto")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Periodicidad")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UsuarioId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CategoriaId");
+
+                    b.HasIndex("CuentaId");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.ToTable("GastosFijos");
                 });
 
             modelBuilder.Entity("ControlGastos.Domain.Entity.Ingresos", b =>
@@ -94,6 +184,9 @@ namespace ControlGastos.Infrastructure.Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("CategoriaId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("CuentaId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("Fecha")
@@ -113,11 +206,52 @@ namespace ControlGastos.Infrastructure.Data.Migrations
                     b.Property<string>("Notas")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("UsuarioId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CategoriaId");
 
+                    b.HasIndex("CuentaId");
+
+                    b.HasIndex("UsuarioId");
+
                     b.ToTable("Ingresos");
+                });
+
+            modelBuilder.Entity("ControlGastos.Domain.Entity.MetaAhorro", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("FechaObjetivo")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("MontoAhorrado")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("MontoObjetivo")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("NombreObjetivo")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("UsuarioId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.ToTable("MetaAhorros");
                 });
 
             modelBuilder.Entity("ControlGastos.Domain.Entity.Presupuesto", b =>
@@ -144,9 +278,14 @@ namespace ControlGastos.Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("UsuarioId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CategoriaId");
+
+                    b.HasIndex("UsuarioId");
 
                     b.ToTable("Presupuestos");
                 });
@@ -204,6 +343,17 @@ namespace ControlGastos.Infrastructure.Data.Migrations
                     b.ToTable("Usuarios");
                 });
 
+            modelBuilder.Entity("ControlGastos.Domain.Entity.Cuenta", b =>
+                {
+                    b.HasOne("ControlGastos.Domain.Entity.Usuario", "Usuario")
+                        .WithMany("Cuentas")
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Usuario");
+                });
+
             modelBuilder.Entity("ControlGastos.Domain.Entity.Gasto", b =>
                 {
                     b.HasOne("ControlGastos.Domain.Entity.Categoria", "Categoria")
@@ -212,7 +362,47 @@ namespace ControlGastos.Infrastructure.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("ControlGastos.Domain.Entity.Cuenta", "Cuenta")
+                        .WithMany("Gastos")
+                        .HasForeignKey("CuentaId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("ControlGastos.Domain.Entity.Usuario", "Usuario")
+                        .WithMany("Gastos")
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("Categoria");
+
+                    b.Navigation("Cuenta");
+
+                    b.Navigation("Usuario");
+                });
+
+            modelBuilder.Entity("ControlGastos.Domain.Entity.GastoFijo", b =>
+                {
+                    b.HasOne("ControlGastos.Domain.Entity.Categoria", "Categoria")
+                        .WithMany()
+                        .HasForeignKey("CategoriaId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("ControlGastos.Domain.Entity.Cuenta", "Cuenta")
+                        .WithMany("GastosFijos")
+                        .HasForeignKey("CuentaId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("ControlGastos.Domain.Entity.Usuario", "Usuario")
+                        .WithMany("GastosFijos")
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Categoria");
+
+                    b.Navigation("Cuenta");
+
+                    b.Navigation("Usuario");
                 });
 
             modelBuilder.Entity("ControlGastos.Domain.Entity.Ingresos", b =>
@@ -223,7 +413,32 @@ namespace ControlGastos.Infrastructure.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("ControlGastos.Domain.Entity.Cuenta", "Cuenta")
+                        .WithMany("Ingresos")
+                        .HasForeignKey("CuentaId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("ControlGastos.Domain.Entity.Usuario", "Usuario")
+                        .WithMany("Ingresos")
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("Categoria");
+
+                    b.Navigation("Cuenta");
+
+                    b.Navigation("Usuario");
+                });
+
+            modelBuilder.Entity("ControlGastos.Domain.Entity.MetaAhorro", b =>
+                {
+                    b.HasOne("ControlGastos.Domain.Entity.Usuario", "Usuario")
+                        .WithMany("MetasAhorro")
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Usuario");
                 });
 
             modelBuilder.Entity("ControlGastos.Domain.Entity.Presupuesto", b =>
@@ -233,7 +448,15 @@ namespace ControlGastos.Infrastructure.Data.Migrations
                         .HasForeignKey("CategoriaId")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("ControlGastos.Domain.Entity.Usuario", "Usuario")
+                        .WithMany("Presupuestos")
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("Categoria");
+
+                    b.Navigation("Usuario");
                 });
 
             modelBuilder.Entity("ControlGastos.Domain.Entity.RefreshToken", b =>
@@ -252,6 +475,30 @@ namespace ControlGastos.Infrastructure.Data.Migrations
                     b.Navigation("Gastos");
 
                     b.Navigation("Ingresos");
+                });
+
+            modelBuilder.Entity("ControlGastos.Domain.Entity.Cuenta", b =>
+                {
+                    b.Navigation("Gastos");
+
+                    b.Navigation("GastosFijos");
+
+                    b.Navigation("Ingresos");
+                });
+
+            modelBuilder.Entity("ControlGastos.Domain.Entity.Usuario", b =>
+                {
+                    b.Navigation("Cuentas");
+
+                    b.Navigation("Gastos");
+
+                    b.Navigation("GastosFijos");
+
+                    b.Navigation("Ingresos");
+
+                    b.Navigation("MetasAhorro");
+
+                    b.Navigation("Presupuestos");
                 });
 #pragma warning restore 612, 618
         }

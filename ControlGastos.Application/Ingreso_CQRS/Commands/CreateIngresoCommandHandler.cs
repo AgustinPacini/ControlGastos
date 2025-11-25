@@ -26,8 +26,6 @@ namespace ControlGastos.Application.Ingreso_CQRS.Commands
         /// <returns>Id del ingreso creado.</returns>
         public async Task<int> Handle(CreateIngresoCommand request, CancellationToken cancellationToken)
         {
-            // Se podría agregar validación adicional aquí (FluentValidation, reglas de negocio, etc.)
-
             var ingresos = new Ingresos
             {
                 Fuente = request.Ingresos.Fuente,
@@ -35,13 +33,11 @@ namespace ControlGastos.Application.Ingreso_CQRS.Commands
                 Fecha = request.Ingresos.Fecha,
                 MetodoRecepcion = request.Ingresos.MetodoRecepcion,
                 Notas = request.Ingresos.Notas,
-                CategoriaId = request.Ingresos.CategoriaId
+                CategoriaId = request.Ingresos.CategoriaId,
+                UsuarioId = request.UsuarioId // 🔹
             };
 
-            // Guardamos en el repositorio
             await _baseRepository.AddAsync(ingresos);
-
-            // Retornamos el Id (asumiendo que la DB lo generó al guardar)
             return ingresos.Id;
         }
     }

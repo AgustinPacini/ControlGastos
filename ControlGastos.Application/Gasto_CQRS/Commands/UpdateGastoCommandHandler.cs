@@ -24,6 +24,9 @@ namespace ControlGastos.Application.Gasto_CQRS.Commands
             var gasto = await _baseRepository.GetById(request.Id);
             if (gasto == null) return false;
 
+            // 🔹 validar que el gasto sea del usuario
+            if (gasto.UsuarioId != request.UsuarioId) return false;
+
             gasto.Descripcion = request.GastoDto.Concepto ?? gasto.Descripcion;
             gasto.Monto = request.GastoDto.Monto;
             gasto.Fecha = request.GastoDto.Fecha;
@@ -34,5 +37,6 @@ namespace ControlGastos.Application.Gasto_CQRS.Commands
             await _baseRepository.UpdateAsync(gasto);
             return true;
         }
+
     }
 }
