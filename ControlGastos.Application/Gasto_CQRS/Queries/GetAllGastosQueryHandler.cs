@@ -26,7 +26,9 @@ namespace ControlGastos.Application.Gasto_CQRS.Queries
         public async Task<List<Gasto>> Handle(GetAllGastosQuery request, CancellationToken cancellationToken)
         {
             var gastos = await _baseRepository.GetAllAsync();
-            return gastos.ToList();
+            return gastos
+                .Where(g => g.UsuarioId == request.UsuarioId)
+                .ToList();
         }
     }
 }

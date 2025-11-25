@@ -3,6 +3,7 @@ using ControlGastos.Application.Presupuesto_CQRS.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace ControlGastos.Web.Controllers
 {
@@ -12,7 +13,14 @@ namespace ControlGastos.Web.Controllers
     public class PresupuestosController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private int GetUsuarioId()
+        {
+            var claim = User.FindFirst("sub");
+            if (claim == null)
+                throw new Exception("No se encontró el id de usuario en el token.");
 
+            return int.Parse(claim.Value);
+        }
         public PresupuestosController(IMediator mediator)
         {
             _mediator = mediator;

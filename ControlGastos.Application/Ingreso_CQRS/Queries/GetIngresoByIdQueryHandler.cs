@@ -20,7 +20,11 @@ namespace ControlGastos.Application.Ingreso_CQRS.Queries
 
         public async Task<Ingresos?> Handle(GetIngresoByIdQuery request, CancellationToken cancellationToken)
         {
-            return await _baseRepository.GetById(request.Id);
+            var ingreso = await _baseRepository.GetById(request.Id);
+            if (ingreso == null || ingreso.UsuarioId != request.UsuarioId)
+                return null;
+
+            return ingreso;
         }
     }
 }

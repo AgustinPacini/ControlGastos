@@ -7,5 +7,5 @@ using System.Threading.Tasks;
 
 namespace ControlGastos.Application.Gasto_CQRS.Commands
 {
-    public record DeleteGastoCommand(int Id) : IRequest<bool>;
+    public record DeleteGastoCommand(int Id, int UsuarioId) : IRequest<bool>;
 }

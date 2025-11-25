@@ -11,6 +11,13 @@ public class Gasto
 
     public int CategoriaId { get; set; }
     public Categoria Categoria { get; set; } = null!;
+    // 🔹 Multiusuario
+    public int UsuarioId { get; set; }
+    public Usuario Usuario { get; set; } = null!;
+
+    // 🔹 Relación con Cuenta (la agregamos para más adelante)
+    public int? CuentaId { get; set; }
+    public Cuenta? Cuenta { get; set; }
 
 
 }

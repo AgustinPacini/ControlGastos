@@ -9,6 +9,6 @@ using System.Threading.Tasks;
 
 namespace ControlGastos.Application.Ingreso_CQRS.Queries
 {
-    public record GetAllIngresosQuery() : IRequest<List<IngresosDto>>;
-    
+    public record GetAllIngresosQuery(int UsuarioId) : IRequest<List<IngresosDto>>;
+
 }

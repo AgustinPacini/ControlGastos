@@ -3,7 +3,7 @@ using ControlGastos.Application.Ingreso_CQRS.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
+using System.Security.Claims;
 namespace ControlGastos.Web.Controllers
 {
     /// <summary>
@@ -15,7 +15,14 @@ namespace ControlGastos.Web.Controllers
     public class IngresoController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private int GetUsuarioId()
+        {
+            var claim = User.FindFirst("sub");
+            if (claim == null)
+                throw new Exception("No se encontró el id de usuario en el token.");
 
+            return int.Parse(claim.Value);
+        }
         public IngresoController(IMediator mediator)
         {
             _mediator = mediator;
@@ -27,55 +34,33 @@ namespace ControlGastos.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] IngresosDto dto)
         {
-            var id = await _mediator.Send(new CreateIngresoCommand(dto));
-            return CreatedAtAction(nameof(GetById), new { id }, new { id });
+            var usuarioId = GetUsuarioId();
+            var id = await _mediator.Send(new CreateIngresoCommand(usuarioId, dto));
+            return CreatedAtAction(nameof(GetAll), new { id }, new { id });
         }
 
-        /// <summary>
-        /// Obtiene el listado completo de ingresos.
-        /// </summary>
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var ingresos = await _mediator.Send(new GetAllIngresosQuery());
-            return Ok(ingresos);
+            var usuarioId = GetUsuarioId();
+            var result = await _mediator.Send(new GetAllIngresosQuery(usuarioId));
+            return Ok(result);
         }
 
-        /// <summary>
-        /// Obtiene un ingreso por su Id.
-        /// </summary>
-        
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var ingreso = await _mediator.Send(new GetIngresoByIdQuery(id));
+            var usuarioId = GetUsuarioId();
+            var ingreso = await _mediator.Send(new GetIngresoByIdQuery(id, usuarioId));
             if (ingreso is null) return NotFound(new { message = "Ingreso no encontrado" });
             return Ok(ingreso);
-        } 
-        
-
-        /// <summary>
-        /// Elimina un ingreso por su Id.
-        /// </summary>
-        [HttpDelete("{id:int}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var result = await _mediator.Send(new DeleteIngresoCommand(id));
-
-            if (!result)
-            {
-                return NotFound(new { message = "No se encontró el ingreso para eliminar" });
-            }
-
-            return Ok(new { message = "Ingreso eliminado con éxito" });
         }
-       
-       
 
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Update(int id, [FromBody] IngresosDto dto)
         {
-            var result = await _mediator.Send(new UpdateIngresoCommand(id, dto));
+            var usuarioId = GetUsuarioId();
+            var result = await _mediator.Send(new UpdateIngresoCommand(id, usuarioId, dto));
             if (!result) return NotFound(new { message = "Ingreso no encontrado" });
 
             return Ok(new { message = "Ingreso actualizado con éxito" });

@@ -23,12 +23,13 @@ namespace ControlGastos.Application.Ingreso_CQRS.Commands
             var ingreso = await _baseRepository.GetById(request.Id);
             if (ingreso == null) return false;
 
-            ingreso.Fuente = request.IngresoDto.Fuente ?? ingreso.Fuente;
-            ingreso.Monto = request.IngresoDto.Monto;
-            ingreso.Fecha = request.IngresoDto.Fecha;
-            ingreso.MetodoRecepcion = request.IngresoDto.MetodoRecepcion ?? ingreso.MetodoRecepcion;
-            ingreso.Notas = request.IngresoDto.Notas;
-            ingreso.CategoriaId = request.IngresoDto.CategoriaId;
+            ingreso.Fuente = request.Ingresos.Fuente ?? ingreso.Fuente;
+            ingreso.Monto = request.Ingresos.Monto;
+            ingreso.Fecha = request.Ingresos.Fecha;
+            ingreso.MetodoRecepcion = request.Ingresos.MetodoRecepcion ?? ingreso.MetodoRecepcion;
+            ingreso.Notas = request.Ingresos.Notas;
+            ingreso.CategoriaId = request.Ingresos.CategoriaId;
+            ingreso.UsuarioId = request.UsuarioId;
 
             await _baseRepository.UpdateAsync(ingreso);
             return true;

@@ -7,5 +7,6 @@ using System.Threading.Tasks;
 
 namespace ControlGastos.Application.MetasAhorro_CQRS.Queries
 {
-    public record GetMetaAhorroDetalleQuery(int Id) : IRequest<MetaAhorroDetalleResult>;
+    public record GetMetaAhorroDetalleQuery(int Id, int UsuarioId) : IRequest<MetaAhorroDetalleResult?>;
+
 }

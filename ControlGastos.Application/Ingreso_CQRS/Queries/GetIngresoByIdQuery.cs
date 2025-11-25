@@ -8,5 +8,5 @@ using System.Threading.Tasks;
 
 namespace ControlGastos.Application.Ingreso_CQRS.Queries
 {
-    public record GetIngresoByIdQuery(int Id) : IRequest<Ingresos?>;
+    public record GetIngresoByIdQuery(int Id, int UsuarioId) : IRequest<Ingresos?>;
 }

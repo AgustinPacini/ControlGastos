@@ -28,15 +28,16 @@ namespace ControlGastos.Application.Ingreso_CQRS.Queries
         {
             var ingresos = await _baseRepository.GetAllAsync();
 
-            // Proyección explícita a DTO: evita exponer directamente la entidad de dominio.
             return ingresos
+                .Where(i => i.UsuarioId == request.UsuarioId)
                 .Select(i => new IngresosDto
                 {
                     Fuente = i.Fuente,
                     Monto = i.Monto,
                     Fecha = i.Fecha,
                     MetodoRecepcion = i.MetodoRecepcion,
-                    Notas = i.Notas
+                    Notas = i.Notas,
+                    CategoriaId = i.CategoriaId
                 })
                 .ToList();
         }
