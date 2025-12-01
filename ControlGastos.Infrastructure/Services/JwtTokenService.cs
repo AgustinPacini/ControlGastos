@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace ControlGastos.Infrastructure.Services
 {
-    
+
 
     public class JwtTokenService : IJwtTokenService
     {
@@ -34,19 +34,26 @@ namespace ControlGastos.Infrastructure.Services
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
             // 3. Crear los claims
-            var claims = new[]
-            {
-                new Claim(JwtRegisteredClaimNames.Sub, usuarioId.ToString()),
-                new Claim("nombreUsuario", nombreUsuario)
-                // Puedes agregar más claims o roles aquí
-            };
+            var claims = new List<Claim>
+        {
+            // 👇 este es el claim que probablemente está esperando tu código
+            new Claim(ClaimTypes.NameIdentifier, usuarioId.ToString()),
+
+            // seguimos manteniendo 'sub' por compatibilidad
+            new Claim(JwtRegisteredClaimNames.Sub, usuarioId.ToString()),
+
+            // nombre de usuario
+            new Claim(ClaimTypes.Name, nombreUsuario ?? string.Empty),
+            new Claim("nombreUsuario", nombreUsuario ?? string.Empty)
+            // acá podés sumar roles etc si querés
+        };
 
             // 4. Configurar el token
             var token = new JwtSecurityToken(
                 issuer: issuer,
                 audience: audience,
                 claims: claims,
-                expires: DateTime.Now.AddHours(2),
+                expires: DateTime.UtcNow.AddHours(2),
                 signingCredentials: credentials
             );
 

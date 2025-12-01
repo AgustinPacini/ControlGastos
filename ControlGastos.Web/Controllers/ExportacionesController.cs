@@ -3,6 +3,8 @@ using ControlGastos.Application.Export_CQRS;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ControlGastos.Application.Export_CQRS.Queries;
+using ControlGastos.Web.Extensions;
 
 namespace ControlGastos.Web.Controllers
 {
@@ -20,13 +22,7 @@ namespace ControlGastos.Web.Controllers
                 _mediator = mediator;
             }
 
-            private int GetUsuarioId()
-            {
-                var claim = User.FindFirst("sub");
-                if (claim == null)
-                    throw new Exception("No se encontró el id de usuario en el token.");
-                return int.Parse(claim.Value);
-            }
+
 
             // GET api/exportaciones/gastos?desde=2025-01-01&hasta=2025-12-31
             [HttpGet("gastos")]
@@ -34,8 +30,8 @@ namespace ControlGastos.Web.Controllers
                 [FromQuery] DateTime? desde,
                 [FromQuery] DateTime? hasta)
             {
-                var usuarioId = GetUsuarioId();
-                var bytes = await _mediator.Send(new ExportGastosCsvQuery(usuarioId, desde, hasta));
+            var usuarioId = User.GetUsuarioId();
+            var bytes = await _mediator.Send(new ExportGastosCsvQuery(usuarioId, desde, hasta));
 
                 var fileName = $"gastos_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
                 return File(bytes, "text/csv", fileName);
@@ -47,8 +43,8 @@ namespace ControlGastos.Web.Controllers
                 [FromQuery] DateTime? desde,
                 [FromQuery] DateTime? hasta)
             {
-                var usuarioId = GetUsuarioId();
-                var bytes = await _mediator.Send(new ExportIngresosCsvQuery(usuarioId, desde, hasta));
+            var usuarioId = User.GetUsuarioId();
+            var bytes = await _mediator.Send(new ExportIngresosCsvQuery(usuarioId, desde, hasta));
 
                 var fileName = $"ingresos_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
                 return File(bytes, "text/csv", fileName);
