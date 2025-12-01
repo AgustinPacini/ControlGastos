@@ -1,5 +1,6 @@
 ﻿using ControlGastos.Application.Presupuesto.Commands;
 using ControlGastos.Application.Presupuesto_CQRS.Queries;
+using ControlGastos.Web.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,24 +14,27 @@ namespace ControlGastos.Web.Controllers
     public class PresupuestosController : ControllerBase
     {
         private readonly IMediator _mediator;
-        private int GetUsuarioId()
-        {
-            var claim = User.FindFirst("sub");
-            if (claim == null)
-                throw new Exception("No se encontró el id de usuario en el token.");
-
-            return int.Parse(claim.Value);
-        }
+     
         public PresupuestosController(IMediator mediator)
         {
             _mediator = mediator;
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreatePresupuestoCommand command)
+        public async Task<IActionResult> Create([FromBody] PresupuestoDto PresupuestoDto)
         {
-            var id = await _mediator.Send(command);
+            var usuarioId = User.GetUsuarioId();
+            var id = await _mediator.Send(new CreatePresupuestoCommand (usuarioId, PresupuestoDto));
             return CreatedAtAction(nameof(GetMensuales), new { id }, new { id });
+        }
+        [HttpGet]
+
+        [HttpGet]
+        public async Task<IActionResult> Get()
+        {
+            var usuarioId = User.GetUsuarioId();
+            var result = await _mediator.Send(new GetPresupuestosQuery(usuarioId));
+            return Ok(result);
         }
 
         /// <summary>

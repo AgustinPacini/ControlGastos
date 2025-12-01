@@ -28,4 +28,13 @@ namespace ControlGastos.Application.Reporte_CQRS
         public decimal TotalGastos { get; set; }
         public decimal Balance => TotalIngresos - TotalGastos;
     }
+    public class DashboardResumenDto
+    {
+        public decimal TotalIngresosMes { get; set; }
+        public decimal TotalGastosMes { get; set; }
+        public decimal BalanceMes { get; set; }
+
+        public List<TopCategoriaItem> TopCategorias { get; set; } = new();
+        public List<TendenciaMensualItem> Tendencias { get; set; } = new();
+    }
 }

@@ -1,5 +1,6 @@
 ﻿using ControlGastos.Application.Gasto_CQRS.Commands;
 using ControlGastos.Application.Gasto_CQRS.Queries;
+using ControlGastos.Web.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,14 +16,7 @@ namespace ControlGastos.Web.Controllers
     [Authorize]
     public class GastosController : ControllerBase
     {
-        private int GetUsuarioId()
-        {
-            var claim = User.FindFirst("sub");
-            if (claim == null)
-                throw new Exception("No se encontró el id de usuario en el token.");
-
-            return int.Parse(claim.Value);
-        }
+       
         private readonly IMediator _mediator;
 
         public GastosController(IMediator mediator)
@@ -39,7 +33,7 @@ namespace ControlGastos.Web.Controllers
             if (gastoDto is null)
                 return BadRequest(new { message = "Los datos del gasto son requeridos." });
 
-            var usuarioId = GetUsuarioId();
+            var usuarioId = User.GetUsuarioId();
             var gastoId = await _mediator.Send(new CreateGastoCommand(usuarioId, gastoDto));
 
             return CreatedAtAction(nameof(GetAll), new { id = gastoId }, new { id = gastoId });
@@ -48,7 +42,7 @@ namespace ControlGastos.Web.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var usuarioId = GetUsuarioId();
+            var usuarioId = User.GetUsuarioId();
             var gastos = await _mediator.Send(new GetAllGastosQuery(usuarioId));
             return Ok(gastos);
         }
@@ -56,7 +50,7 @@ namespace ControlGastos.Web.Controllers
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var usuarioId = GetUsuarioId();
+            var usuarioId = User.GetUsuarioId();
             var gasto = await _mediator.Send(new GetGastoByIdQuery(id, usuarioId));
             if (gasto is null) return NotFound(new { message = "Gasto no encontrado" });
             return Ok(gasto);
@@ -65,7 +59,7 @@ namespace ControlGastos.Web.Controllers
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Update(int id, [FromBody] GastoDto dto)
         {
-            var usuarioId = GetUsuarioId();
+            var usuarioId = User.GetUsuarioId();
             var result = await _mediator.Send(new UpdateGastoCommand(id, usuarioId, dto));
             if (!result) return NotFound(new { message = "Gasto no encontrado" });
 
@@ -75,7 +69,7 @@ namespace ControlGastos.Web.Controllers
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var usuarioId = GetUsuarioId();
+            var usuarioId = User.GetUsuarioId();
             var result = await _mediator.Send(new DeleteGastoCommand(id, usuarioId));
             if (!result) return NotFound(new { message = "Gasto no encontrado" });
 

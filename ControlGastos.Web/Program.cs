@@ -134,11 +134,16 @@ var app = builder.Build();
 // Configuración del pipeline HTTP
 // ==========================================
 
-if (app.Environment.IsDevelopment())
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    // Ruta RELATIVA: sirve tanto en Kestrel como en IIS bajo /ControlGastos
+    c.SwaggerEndpoint("../swagger/v1/swagger.json", "ControlGastos API v1");
+
+    // Dejalo con el prefijo por defecto "swagger"
+    // => UI en /ControlGastos/swagger
+    // c.RoutePrefix = "swagger"; // (opcional, es el default)
+});
 
 app.UseHttpsRedirection();
 

@@ -34,3 +34,4 @@ namespace ControlGastos.Application.MetasAhorro_CQRS.Command
             return meta.Id;
         }
     }
+}
