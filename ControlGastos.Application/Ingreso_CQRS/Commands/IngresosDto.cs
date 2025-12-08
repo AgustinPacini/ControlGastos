@@ -8,6 +8,7 @@ namespace ControlGastos.Application.Ingreso_CQRS.Commands
     /// </summary>
     public class IngresosDto
     {
+         public int Id { get; set; }
         /// <summary>
         /// Origen del ingreso (por ejemplo: salario, freelance, venta, etc.).
         /// </summary>
@@ -34,5 +35,6 @@ namespace ControlGastos.Application.Ingreso_CQRS.Commands
         public string? Notas { get; set; }
 
         public int CategoriaId { get; set; }
+        public int? CuentaId { get; set; }
     }
 }

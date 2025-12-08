@@ -12,10 +12,12 @@ namespace ControlGastos.Application.Ingreso_CQRS.Commands
     public class CreateIngresoCommandHandler : IRequestHandler<CreateIngresoCommand, int>
     {
         private readonly IBaseRepository<Ingresos> _baseRepository;
+        private readonly IBaseRepository<Cuenta> _cuentaRepository;
 
-        public CreateIngresoCommandHandler(IBaseRepository<Ingresos> baseRepository)
+        public CreateIngresoCommandHandler(IBaseRepository<Ingresos> baseRepository, IBaseRepository<Cuenta> cuentaRepository)
         {
             _baseRepository = baseRepository;
+            _cuentaRepository = cuentaRepository;
         }
 
         /// <summary>
@@ -34,10 +36,22 @@ namespace ControlGastos.Application.Ingreso_CQRS.Commands
                 MetodoRecepcion = request.Ingresos.MetodoRecepcion,
                 Notas = request.Ingresos.Notas,
                 CategoriaId = request.Ingresos.CategoriaId,
-                UsuarioId = request.UsuarioId // 🔹
+                UsuarioId = request.UsuarioId, // 🔹
+                 CuentaId = request.Ingresos.CuentaId
             };
 
             await _baseRepository.AddAsync(ingresos);
+            // 👇 Si viene cuenta, sumamos al saldo
+            if (request.Ingresos.CuentaId.HasValue)
+            {
+                var cuenta = await _cuentaRepository.GetById(request.Ingresos.CuentaId.Value);
+
+                if (cuenta.UsuarioId != request.UsuarioId)
+                    throw new InvalidOperationException("La cuenta no pertenece al usuario.");
+
+                cuenta.SaldoActual += request.Ingresos.Monto;
+                await _cuentaRepository.UpdateAsync(cuenta);
+            }
             return ingresos.Id;
         }
     }

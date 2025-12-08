@@ -4,6 +4,7 @@ using ControlGastos.Application.Cuenta_CQRS;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ControlGastos.Web.Extensions;
 
 namespace ControlGastos.Web.Controllers
 {
@@ -19,18 +20,12 @@ namespace ControlGastos.Web.Controllers
             _mediator = mediator;
         }
 
-        private int GetUsuarioId()
-        {
-            var claim = User.FindFirst("sub");
-            if (claim == null)
-                throw new Exception("No se encontró el id de usuario en el token.");
-            return int.Parse(claim.Value);
-        }
+       
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var usuarioId = GetUsuarioId();
+            var usuarioId = User.GetUsuarioId();
             var cuentas = await _mediator.Send(new GetCuentasByUsuarioQuery(usuarioId));
             return Ok(cuentas);
         }
@@ -38,7 +33,7 @@ namespace ControlGastos.Web.Controllers
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var usuarioId = GetUsuarioId();
+            var usuarioId = User.GetUsuarioId();
             var cuenta = await _mediator.Send(new GetCuentaByIdQuery(id, usuarioId));
             if (cuenta == null)
                 return NotFound(new { message = "Cuenta no encontrada" });
@@ -49,7 +44,7 @@ namespace ControlGastos.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CuentaDto dto)
         {
-            var usuarioId = GetUsuarioId();
+            var usuarioId = User.GetUsuarioId();
             var id = await _mediator.Send(new CreateCuentaCommand(usuarioId, dto));
             return CreatedAtAction(nameof(GetById), new { id }, new { id });
         }
@@ -57,7 +52,7 @@ namespace ControlGastos.Web.Controllers
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Update(int id, [FromBody] CuentaDto dto)
         {
-            var usuarioId = GetUsuarioId();
+            var usuarioId = User.GetUsuarioId();
             var ok = await _mediator.Send(new UpdateCuentaCommand(id, usuarioId, dto));
             if (!ok)
                 return NotFound(new { message = "Cuenta no encontrada" });
@@ -68,7 +63,7 @@ namespace ControlGastos.Web.Controllers
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var usuarioId = GetUsuarioId();
+            var usuarioId = User.GetUsuarioId();
             var ok = await _mediator.Send(new DeleteCuentaCommand(id, usuarioId));
             if (!ok)
                 return NotFound(new { message = "Cuenta no encontrada" });
