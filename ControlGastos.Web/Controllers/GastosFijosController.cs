@@ -70,5 +70,20 @@ namespace ControlGastos.Web.Controllers
 
             return Ok(new { message = "Gasto fijo eliminado correctamente" });
         }
+        [HttpPost("aplicar")]
+        public async Task<IActionResult> Aplicar([FromBody] AplicarGastosFijosRequest? request)
+        {
+            var usuarioId = User.GetUsuarioId();
+            var fecha = request?.FechaReferencia ?? DateTime.Now;
+
+            var generados = await _mediator.Send(
+                new AplicarGastosFijosDelMesCommand(usuarioId, fecha));
+
+            return Ok(new
+            {
+                message = $"Gastos fijos aplicados correctamente para {fecha:yyyy-MM}.",
+                generados
+            });
+        }
     }
 }

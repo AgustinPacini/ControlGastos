@@ -32,6 +32,7 @@ namespace ControlGastos.Application.Ingreso_CQRS.Queries
                 .Where(i => i.UsuarioId == request.UsuarioId)
                 .Select(i => new IngresosDto
                 {
+                    Id = i.Id,                                   // <- agregar
                     Fuente = i.Fuente,
                     Monto = i.Monto,
                     Fecha = i.Fecha,

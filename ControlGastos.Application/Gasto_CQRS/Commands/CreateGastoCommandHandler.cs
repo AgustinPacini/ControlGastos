@@ -14,12 +14,15 @@ namespace ControlGastos.Application.Gasto_CQRS.Commands
     {
         private readonly IBaseRepository<Gasto> _baseRepository;
         private readonly IValidator<GastoDto> _validator;
+        private readonly IBaseRepository<Cuenta> _cuentaRepository;
 
         public CreateGastoCommandHandler(IBaseRepository<Gasto> baseRepository,
-                                         IValidator<GastoDto> validator)
+                                         IValidator<GastoDto> validator, IBaseRepository<Cuenta> cuentaRepository) 
         {
             _baseRepository = baseRepository;
             _validator = validator;
+            _cuentaRepository = cuentaRepository;
+
         }
 
         public async Task<int> Handle(CreateGastoCommand request, CancellationToken cancellationToken)
@@ -36,10 +39,22 @@ namespace ControlGastos.Application.Gasto_CQRS.Commands
                 MetodoPago = request.GastoDto.MetodoPago ?? string.Empty,
                 Notas = request.GastoDto.Notas,
                 CategoriaId = request.GastoDto.CategoriaId,
-                UsuarioId = request.UsuarioId   // 🔹 importante
+                UsuarioId = request.UsuarioId,  // 🔹 importante
+                 CuentaId = request.GastoDto.CuentaId
             };
 
             await _baseRepository.AddAsync(gasto);
+            // 👇 Si el gasto tiene cuenta asociada, descontamos el saldo
+            if (request.GastoDto.CuentaId.HasValue)
+            {
+                var cuenta = await _cuentaRepository.GetById(request.GastoDto.CuentaId.Value);
+
+                if (cuenta.UsuarioId != request.UsuarioId)
+                    throw new InvalidOperationException("La cuenta no pertenece al usuario.");
+
+                cuenta.SaldoActual -= request.GastoDto.Monto;
+                await _cuentaRepository.UpdateAsync(cuenta);
+            }
             return gasto.Id;
         }
     }

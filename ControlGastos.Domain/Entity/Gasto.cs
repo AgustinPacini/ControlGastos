@@ -19,5 +19,9 @@ public class Gasto
     public int? CuentaId { get; set; }
     public Cuenta? Cuenta { get; set; }
 
+    public bool EsGastoFijo { get; set; } = false;
+    public int? GastoFijoId { get; set; }
+    public GastoFijo? GastoFijo { get; set; }
+
 
 }

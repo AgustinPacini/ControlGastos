@@ -29,6 +29,7 @@ namespace ControlGastos.Application.Reporte.Queries.BalanceMensual
 
             var result = new BalanceMensualResult
             {
+                mes = request.Mes,
                 TotalIngresos = totalIngresos,
                 TotalGastos = totalGastos,
                 Balance = totalIngresos - totalGastos
