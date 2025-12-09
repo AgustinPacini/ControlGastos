@@ -22,7 +22,7 @@ namespace ControlGastos.Application.MetasAhorro_CQRS.Queries
         public async Task<MetaAhorroDetalleResult> Handle(
     GetMetaAhorroDetalleQuery request, CancellationToken cancellationToken)
         {
-            var meta = await _repo.GetById(request.Id);
+            var meta = await _repo.GetById(request.Id, cancellationToken);
 
             if (meta == null)
                 throw new KeyNotFoundException("Meta de ahorro no encontrada.");

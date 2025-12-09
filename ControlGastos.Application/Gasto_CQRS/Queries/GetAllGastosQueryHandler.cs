@@ -13,11 +13,11 @@ namespace ControlGastos.Application.Gasto_CQRS.Queries
     /// </summary>
     public class GetAllGastosQueryHandler : IRequestHandler<GetAllGastosQuery, List<Gasto>>
     {
-        private readonly IBaseRepository<Gasto> _baseRepository;
+        private readonly IGastoRepository _gastoRepository;
 
-        public GetAllGastosQueryHandler(IBaseRepository<Gasto> baseRepository)
+        public GetAllGastosQueryHandler(IGastoRepository gastoRepository)
         {
-            _baseRepository = baseRepository;
+            _gastoRepository = gastoRepository;
         }
 
         /// <summary>
@@ -25,10 +25,8 @@ namespace ControlGastos.Application.Gasto_CQRS.Queries
         /// </summary>
         public async Task<List<Gasto>> Handle(GetAllGastosQuery request, CancellationToken cancellationToken)
         {
-            var gastos = await _baseRepository.GetAllAsync();
-            return gastos
-                .Where(g => g.UsuarioId == request.UsuarioId)
-                .ToList();
+            var gastos = await _gastoRepository.GetByUsuarioAsync(request.UsuarioId, cancellationToken);
+            return gastos;
         }
     }
 }

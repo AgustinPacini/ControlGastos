@@ -1,4 +1,6 @@
-﻿using ControlGastos.Domain.Interfaces;
+﻿using ControlGastos.Domain.Entity;
+using ControlGastos.Domain.Exceptions;
+using ControlGastos.Domain.Interfaces;
 using MediatR;
 using System;
 using System.Collections.Generic;
@@ -26,45 +28,60 @@ namespace ControlGastos.Application.Login
 
         public async Task<RefreshTokenResponseDto> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
         {
-            var refreshTokenString = request.Dto.RefreshToken;
+            
 
-            // 1. Buscar el refresh token en BD
-            var refreshToken = await _refreshTokenRepo.GetByTokenAsync(refreshTokenString);
-            if (refreshToken == null)
-                throw new Exception("Refresh token inválido.");
+                var storedToken = await _refreshTokenRepo.GetByTokenAsync(request.Dto.RefreshToken);
+                 var usuario = await _usuarioRepo.GetByIdAsync(storedToken.UsuarioId);
+            if (storedToken == null)
+                    throw new InvalidCredentialsException("Refresh token inválido.");
 
-            // 2. Verificar si está vencido o revocado
-            if (refreshToken.Expira < DateTime.Now)
-                throw new Exception("Refresh token expirado.");
+                if (storedToken.Revocado || storedToken.Expira <= DateTime.UtcNow)
+                {
+                    // Marcamos revocado si aún no lo estaba (ej: expirado)
+                    if (!storedToken.Revocado)
+                    {
+                        storedToken.Revocado = true;
+                        storedToken.RevocadoEn = DateTime.UtcNow;
+                        storedToken.RevocadoPorIp = usuario.NombreUsuario;
+                        await _refreshTokenRepo.UpdateAsync(storedToken);
+                    }
 
-            if (refreshToken.Revocado)
-                throw new Exception("Refresh token revocado.");
+                    throw new InvalidCredentialsException("Refresh token expirado o revocado.");
+                }
 
-            // 3. Obtener el usuario asociado
-            var usuario = await _usuarioRepo.GetByIdAsync(refreshToken.UsuarioId);
-            if (usuario == null)
-                throw new Exception("Usuario no encontrado.");
+                // Buscamos usuario
+                
+                if (usuario == null)
+                    throw new KeyNotFoundException("No se encontró el usuario asociado al token.");
 
-            // 4. Generar un nuevo Access Token
-            var nuevoAccessToken = _jwtTokenService.GenerarToken(usuario.NombreUsuario, usuario.Id);
+                // Revocamos el token anterior
+                storedToken.Revocado = true;
+                storedToken.RevocadoEn = DateTime.UtcNow;
+                storedToken.RevocadoPorIp = usuario.NombreUsuario;
+                await _refreshTokenRepo.UpdateAsync(storedToken);
 
-            // 5. (Opcional) Generar un nuevo Refresh Token para prolongar la sesión
-            //     o puedes seguir usando el mismo refresh token hasta su fecha de expiración
-            //     Aquí mostraremos cómo reemplazarlo:
-            var nuevoRefreshTokenString = Guid.NewGuid().ToString("N") + Guid.NewGuid().ToString("N");
-            refreshToken.Token = nuevoRefreshTokenString;
-            refreshToken.Expira = DateTime.Now.AddDays(7); // Reinicia su vigencia
-            // Marcamos como revocado "el viejo token"? 
-            // En este caso, estamos reutilizando el MISMO registro, cambiando su token y fecha.
-            // O podríamos revocar y crear uno nuevo. Depende de tu estrategia.
+                // Generamos nuevos tokens
+                var newAccessToken = _jwtTokenService.GenerarToken(usuario.NombreUsuario,usuario.Id);
+                var newRefreshTokenString = Guid.NewGuid().ToString("N") + Guid.NewGuid().ToString("N");
 
-            await _refreshTokenRepo.UpdateAsync(refreshToken);
+                var newRefreshToken = new RefreshToken
+                {
+                    UsuarioId = usuario.Id,
+                    Token = newRefreshTokenString,
+                    Creado = DateTime.UtcNow,
+                    CreadoPorIp = usuario.NombreUsuario,
+                    Expira = DateTime.UtcNow.AddDays(7),
+                    Revocado = false
+                };
 
-            return new RefreshTokenResponseDto
-            {
-                AccessToken = nuevoAccessToken,
-                RefreshToken = nuevoRefreshTokenString
-            };
-        }
+                await _refreshTokenRepo.AddAsync(newRefreshToken);
+
+                return new RefreshTokenResponseDto
+                {
+                    AccessToken = newAccessToken,
+                    RefreshToken = newRefreshTokenString
+                };
+            }
+          
     }
 }

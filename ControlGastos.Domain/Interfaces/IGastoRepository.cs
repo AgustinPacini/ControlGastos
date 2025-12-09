@@ -11,7 +11,8 @@ namespace ControlGastos.Domain.Interfaces
     {
         Task<IEnumerable<Gasto>> GetByMonth(int year, int month);
         decimal ObtenerTotalGastosPorMes(int year, int month);
-        
-        
+        Task<List<Gasto>> GetByUsuarioAsync(int usuarioId, CancellationToken cancellationToken = default);
+
+
     }
 }

@@ -41,5 +41,12 @@ namespace ControlGastos.Infrastructure.Repositories
                 .Where(g => g.Fecha.Month == month && g.Fecha.Year == year)
                 .Sum(g => g.Monto);
         }
+        public async Task<List<Gasto>> GetByUsuarioAsync(int usuarioId, CancellationToken cancellationToken = default)
+        {
+            return await _context.Gastos
+                .AsNoTracking()
+                .Where(g => g.UsuarioId == usuarioId)
+                .ToListAsync(cancellationToken);
+        }
     }
 }

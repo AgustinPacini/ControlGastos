@@ -1,11 +1,10 @@
 ﻿using ControlGastos.Domain.Entity;
+using ControlGastos.Domain.Exceptions;
 using ControlGastos.Domain.Interfaces;
 using FluentValidation;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using Microsoft.Extensions.Logging;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ControlGastos.Application.Login
@@ -16,22 +15,26 @@ namespace ControlGastos.Application.Login
         private readonly IJwtTokenService _jwtTokenService;
         private readonly IRefreshTokenRepository _refreshTokenRepository;
         private readonly IValidator<LoginDto> _validator;
+        private readonly ILogger<LoginCommandHandler> _logger;
 
         public LoginCommandHandler(
             IUsuarioRepository usuarioRepository,
             IJwtTokenService jwtTokenService,
             IRefreshTokenRepository refreshTokenRepository,
-            IValidator<LoginDto> validator)
+            IValidator<LoginDto> validator,
+            ILogger<LoginCommandHandler> logger)
         {
             _usuarioRepository = usuarioRepository;
             _jwtTokenService = jwtTokenService;
             _refreshTokenRepository = refreshTokenRepository;
             _validator = validator;
+            _logger = logger;
         }
 
         public async Task<LoginResponseDto> Handle(LoginCommand request, CancellationToken cancellationToken)
         {
             var loginDto = request.loginDto;
+            var nombreUsuario = request.loginDto.NombreUsuario?.Trim();
 
             // 1. Validar el DTO con FluentValidation
             var validationResult = await _validator.ValidateAsync(loginDto, cancellationToken);
@@ -40,19 +43,32 @@ namespace ControlGastos.Application.Login
                 var errors = validationResult.Errors.Select(e => e.ErrorMessage);
                 throw new Exception($"Errores de validación: {string.Join(", ", errors)}");
             }
+            if (string.IsNullOrWhiteSpace(nombreUsuario) || string.IsNullOrWhiteSpace(request.loginDto.Password))
+            {
+                throw new ValidationException("El usuario y la contraseña son obligatorios.");
+            }
 
             // 2. Buscar el usuario por nombreUsuario
-            var usuario = await _usuarioRepository.GetByNombreUsuarioAsync(loginDto.NombreUsuario);
+            var usuario = await _usuarioRepository.GetByNombreUsuarioAsync(nombreUsuario);
             if (usuario == null)
             {
-                throw new Exception("Usuario no encontrado.");
+                _logger.LogWarning(
+                    "Intento de login fallido - usuario no encontrado. NombreUsuario: {NombreUsuario}",
+                    nombreUsuario);
+
+                // Excepción de dominio → 401 en middleware
+                throw new InvalidCredentialsException();
             }
 
             // 3. Verificar la contraseña usando BCrypt
             bool esValido = BCrypt.Net.BCrypt.Verify(loginDto.Password, usuario.PasswordHash);
             if (!esValido)
             {
-                throw new Exception("Contraseña incorrecta.");
+                _logger.LogWarning(
+          "Intento de login fallido - contraseña inválida. NombreUsuario: {NombreUsuario}",
+          nombreUsuario);
+
+                throw new InvalidCredentialsException();
             }
 
             // 4. Generar el Access Token (JWT)
