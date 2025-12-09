@@ -30,7 +30,7 @@ namespace ControlGastos.Application.MetasAhorro_CQRS.Command
                 UsuarioId = request.UsuarioId
             };
 
-            await _metaRepo.AddAsync(meta);
+            await _metaRepo.AddAsync(meta, cancellationToken);
             return meta.Id;
         }
     }

@@ -8,29 +8,24 @@ namespace ControlGastos.Domain.Entity
 {
     public class RefreshToken
     {
-        public int Id { get; set; }
+     public int Id { get; set; }
 
-        /// <summary>
-        /// Usuario al que pertenece este Refresh Token
-        /// </summary>
-        public int UsuarioId { get; set; }
+    public int UsuarioId { get; set; }
 
-        /// <summary>
-        /// Token opaco (p. ej. un GUID con algo de entropía adicional).
-        /// </summary>
-        public string Token { get; set; } = string.Empty;
+    public string Token { get; set; } = string.Empty;
 
-        /// <summary>
-        /// Fecha de expiración del Refresh Token
-        /// </summary>
-        public DateTime Expira { get; set; }
+    public DateTime Creado { get; set; }
 
-        /// <summary>
-        /// Indica si ya fue usado o revocado
-        /// </summary>
-        public bool Revocado { get; set; }
+    public string? CreadoPorIp { get; set; }
 
-        // Relación con Usuario
-        public Usuario? Usuario { get; set; }
+    public DateTime Expira { get; set; }
+
+    public bool Revocado { get; set; }
+
+    public DateTime? RevocadoEn { get; set; }
+
+    public string? RevocadoPorIp { get; set; }
+
+    public Usuario? Usuario { get; set; }
     }
 }

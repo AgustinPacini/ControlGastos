@@ -1,4 +1,5 @@
 ﻿using ControlGastos.Domain.Entity;
+using ControlGastos.Domain.Exceptions;
 using ControlGastos.Domain.Interfaces;
 using FluentValidation;
 using MediatR;
@@ -12,16 +13,18 @@ namespace ControlGastos.Application.Gasto_CQRS.Commands
     /// </summary>
     public class CreateGastoCommandHandler : IRequestHandler<CreateGastoCommand, int>
     {
-        private readonly IBaseRepository<Gasto> _baseRepository;
+        private readonly IBaseRepository<Gasto> _gastoRepository;
         private readonly IValidator<GastoDto> _validator;
         private readonly IBaseRepository<Cuenta> _cuentaRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
         public CreateGastoCommandHandler(IBaseRepository<Gasto> baseRepository,
-                                         IValidator<GastoDto> validator, IBaseRepository<Cuenta> cuentaRepository) 
+                                         IValidator<GastoDto> validator, IBaseRepository<Cuenta> cuentaRepository, IUnitOfWork unitOfWork) 
         {
-            _baseRepository = baseRepository;
+            _gastoRepository = baseRepository;
             _validator = validator;
             _cuentaRepository = cuentaRepository;
+            _unitOfWork = unitOfWork;
 
         }
 
@@ -30,8 +33,38 @@ namespace ControlGastos.Application.Gasto_CQRS.Commands
             var validationResult = await _validator.ValidateAsync(request.GastoDto, cancellationToken);
             if (!validationResult.IsValid)
                 throw new ValidationException(validationResult.Errors);
+            int nuevoGastoId = 0;
 
-            var gasto = new Gasto
+            // 2) Transacción: crear gasto + actualizar cuenta (si corresponde)
+            await _unitOfWork.ExecuteInTransactionAsync(async ct =>
+            {
+                // 2.1) Si hay cuenta asociada, validamos existencia y pertenencia ANTES
+                Cuenta? cuenta = null;
+
+                if (request.GastoDto.CuentaId.HasValue)
+                {
+                    cuenta = await _cuentaRepository.GetByIdAsync(
+                        request.GastoDto.CuentaId.Value,
+                        ct);
+
+                    if (cuenta == null)
+                    {
+                        throw new KeyNotFoundException("No se encontró la cuenta especificada.");
+                    }
+
+                    if (cuenta.UsuarioId != request.UsuarioId)
+                    {
+                        throw new ForbiddenAccessException("La cuenta no pertenece al usuario autenticado.");
+                    }
+
+                    // No permitir saldo negativo
+                    if (cuenta.SaldoActual < request.GastoDto.Monto)
+                    {
+                        throw new ValidationException("La cuenta no tiene saldo suficiente para registrar este gasto.");
+                    }
+                }
+
+                var gasto = new Gasto
             {
                 Descripcion = request.GastoDto.Concepto ?? string.Empty,
                 Monto = request.GastoDto.Monto,
@@ -43,19 +76,20 @@ namespace ControlGastos.Application.Gasto_CQRS.Commands
                  CuentaId = request.GastoDto.CuentaId
             };
 
-            await _baseRepository.AddAsync(gasto);
-            // 👇 Si el gasto tiene cuenta asociada, descontamos el saldo
-            if (request.GastoDto.CuentaId.HasValue)
-            {
-                var cuenta = await _cuentaRepository.GetById(request.GastoDto.CuentaId.Value);
+                await _gastoRepository.AddAsync(gasto, ct);
+                nuevoGastoId = gasto.Id;
 
-                if (cuenta.UsuarioId != request.UsuarioId)
-                    throw new InvalidOperationException("La cuenta no pertenece al usuario.");
+                // 2.3) Si hay cuenta asociada, descontar saldo
+                if (cuenta != null)
+                {
+                    cuenta.SaldoActual -= request.GastoDto.Monto;
+                    await _cuentaRepository.UpdateAsync(cuenta, ct);
+                }
 
-                cuenta.SaldoActual -= request.GastoDto.Monto;
-                await _cuentaRepository.UpdateAsync(cuenta);
-            }
-            return gasto.Id;
+            }, cancellationToken);
+
+            return nuevoGastoId;
         }
     }
 }
+

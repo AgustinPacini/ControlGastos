@@ -12,9 +12,12 @@ namespace ControlGastos.Web.Extensions
                 user.FindFirst(JwtRegisteredClaimNames.Sub);
 
             if (claim == null || string.IsNullOrWhiteSpace(claim.Value))
-                throw new Exception("No se encontró el id de usuario en el token.");
+                throw new UnauthorizedAccessException("El token no contiene un identificador de usuario válido.");
 
-            return int.Parse(claim.Value);
+            if (!int.TryParse(claim.Value, out var usuarioId))
+                throw new UnauthorizedAccessException("El identificador de usuario del token es inválido.");
+
+            return usuarioId;
         }
     }
 }

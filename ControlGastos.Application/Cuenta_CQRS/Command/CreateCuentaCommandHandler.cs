@@ -29,7 +29,7 @@ namespace ControlGastos.Application.Cuenta_CQRS.Command
                 UsuarioId = request.UsuarioId
             };
 
-            await _repo.AddAsync(cuenta);
+            await _repo.AddAsync(cuenta, cancellationToken);
             return cuenta.Id;
         }
     }

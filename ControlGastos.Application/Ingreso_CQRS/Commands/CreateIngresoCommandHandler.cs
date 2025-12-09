@@ -40,17 +40,17 @@ namespace ControlGastos.Application.Ingreso_CQRS.Commands
                  CuentaId = request.Ingresos.CuentaId
             };
 
-            await _baseRepository.AddAsync(ingresos);
+            await _baseRepository.AddAsync(ingresos, cancellationToken);
             // 👇 Si viene cuenta, sumamos al saldo
             if (request.Ingresos.CuentaId.HasValue)
             {
-                var cuenta = await _cuentaRepository.GetById(request.Ingresos.CuentaId.Value);
+                var cuenta = await _cuentaRepository.GetById(request.Ingresos.CuentaId.Value, cancellationToken);
 
                 if (cuenta.UsuarioId != request.UsuarioId)
                     throw new InvalidOperationException("La cuenta no pertenece al usuario.");
 
                 cuenta.SaldoActual += request.Ingresos.Monto;
-                await _cuentaRepository.UpdateAsync(cuenta);
+                await _cuentaRepository.UpdateAsync(cuenta, cancellationToken);
             }
             return ingresos.Id;
         }

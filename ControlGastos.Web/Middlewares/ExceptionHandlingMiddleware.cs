@@ -49,6 +49,11 @@ namespace ControlGastos.Web.Middlewares
 
                     errors = validationErrors;
                     break;
+                // 1.b) Login / credenciales inválidas
+                case ControlGastos.Domain.Exceptions.InvalidCredentialsException invalidCredsEx:
+                    statusCode = (int)HttpStatusCode.Unauthorized;
+                    errors.Add(invalidCredsEx.Message);
+                    break;
 
                 // 2) Errores de base de datos (FK, UNIQUE, etc.)
                 case DbUpdateException dbEx:
@@ -66,6 +71,11 @@ namespace ControlGastos.Web.Middlewares
                 case UnauthorizedAccessException:
                     statusCode = (int)HttpStatusCode.Unauthorized;
                     errors.Add("No tenés autorización para realizar esta acción.");
+                    break;
+
+                case ControlGastos.Domain.Exceptions.ForbiddenAccessException forbiddenEx:
+                    statusCode = (int)HttpStatusCode.Forbidden;
+                    errors.Add(forbiddenEx.Message);
                     break;
 
                 // 5) Cualquier otra cosa

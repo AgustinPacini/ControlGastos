@@ -19,14 +19,14 @@ namespace ControlGastos.Application.Categoria_CQRS.Commands
 
         public async Task<bool> Handle(UpdateCategoriaCommand request, CancellationToken cancellationToken)
         {
-            var categoria = await _baseRepository.GetById(request.Id);
+            var categoria = await _baseRepository.GetById(request.Id, cancellationToken);
             if (categoria is null) return false;
 
             categoria.Nombre = request.Nombre;
             categoria.Descripcion = request.Descripcion;
             categoria.TipoCategoria = request.TipoCategoria;
 
-            await _baseRepository.UpdateAsync(categoria);
+            await _baseRepository.UpdateAsync(categoria, cancellationToken);
             return true;
         }
     }

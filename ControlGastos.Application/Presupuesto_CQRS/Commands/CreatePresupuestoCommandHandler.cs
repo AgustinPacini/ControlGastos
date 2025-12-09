@@ -42,7 +42,7 @@ namespace ControlGastos.Application.Presupuesto.Commands
                 UsuarioId = request.UsuarioId
             };
 
-            await _presupuestoRepository.AddAsync(presupuesto);
+            await _presupuestoRepository.AddAsync(presupuesto, cancellationToken);
 
             return presupuesto.Id;
         }
