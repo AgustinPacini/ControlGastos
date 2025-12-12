@@ -22,7 +22,7 @@ namespace ControlGastos.Application.Categoria_CQRS.Commands
             var categoria = await _baseRepository.GetById(request.Id);
             if (categoria is null) return false;
 
-            await _baseRepository.DeleteAsync(categoria);
+            await _baseRepository.DeleteAsync(categoria,cancellationToken);
             return true;
         }
     }
