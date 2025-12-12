@@ -1,4 +1,5 @@
 ﻿using ControlGastos.Domain.Entity;
+using ControlGastos.Domain.Exceptions;
 using ControlGastos.Domain.Interfaces;
 using MediatR;
 using System;
@@ -20,18 +21,31 @@ namespace ControlGastos.Application.Ingreso_CQRS.Commands
 
         public async Task<bool> Handle(UpdateIngresoCommand request, CancellationToken cancellationToken)
         {
-            var ingreso = await _baseRepository.GetById(request.Id);
-            if (ingreso == null) return false;
+            var ingreso = await _baseRepository.GetByIdAsync(request.Id, cancellationToken);
+            if (ingreso == null)
+                return false; // 404 en el controller
 
-            ingreso.Fuente = request.Ingresos.Fuente ?? ingreso.Fuente;
+            // Ownership: si no es del usuario → 403
+            if (ingreso.UsuarioId != request.UsuarioId)
+                throw new ForbiddenAccessException("El ingreso no pertenece al usuario autenticado.");
+
+            // Actualizar campos
+            ingreso.Fuente = string.IsNullOrWhiteSpace(request.Ingresos.Fuente)
+                ? ingreso.Fuente
+                : request.Ingresos.Fuente;
+
             ingreso.Monto = request.Ingresos.Monto;
             ingreso.Fecha = request.Ingresos.Fecha;
-            ingreso.MetodoRecepcion = request.Ingresos.MetodoRecepcion ?? ingreso.MetodoRecepcion;
+
+            ingreso.MetodoRecepcion = string.IsNullOrWhiteSpace(request.Ingresos.MetodoRecepcion)
+                ? ingreso.MetodoRecepcion
+                : request.Ingresos.MetodoRecepcion;
+
             ingreso.Notas = request.Ingresos.Notas;
             ingreso.CategoriaId = request.Ingresos.CategoriaId;
-            ingreso.UsuarioId = request.UsuarioId;
+            // UsuarioId no se toca (ya validado)
 
-            await _baseRepository.UpdateAsync(ingreso);
+            await _baseRepository.UpdateAsync(ingreso, cancellationToken);
             return true;
         }
     }
